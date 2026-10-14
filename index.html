@@ -330,6 +330,7 @@
 <script src="pm/cases-a.js"></script>
 <script src="pm/cases-b.js"></script>
 <script src="pm/bank.js"></script>
+<script src="pm/related.js"></script>
 <script>
 /* ---------- frameworks, rubrics and generic probes per category ---------- */
 const CATS = {
@@ -402,6 +403,48 @@ const CASES = [].concat(window.PM_CASES_CORE || [], window.PM_CASES_A || [], win
 const hashId = (s) => { let h = 5381; for (let i = 0; i < s.length; i++) h = ((h * 33) ^ s.charCodeAt(i)) >>> 0; return h.toString(36); };
 const BANK = (window.PM_BANK || []).filter((q) => CATS[q.cat]).map((q) => Object.assign({ id: hashId(q.q) }, q));
 const SOURCES = window.PM_SOURCES || {};
+
+/* ---------- provenance ---------- */
+// Full cases are written for this app, so instead of inventing a source we show the
+// closest real reported questions from the bank (each with its own source) and the
+// references the case's numbers were benchmarked against. Matches live in pm/related.js.
+function similarQuestions(c) {
+  return ((window.PM_RELATED || {})[c.id] || []).map((t) => BANK.find((q) => q.q === t)).filter((q) => q && SOURCES[q.src]);
+}
+const BASE_REFS = [
+  { name: 'Exponent — top PM interview questions', url: 'https://www.tryexponent.com/blog/top-product-manager-interview-questions' },
+  { name: 'IGotAnOffer — PM interview grading rubrics', url: 'https://igotanoffer.com/en/advice/pm-interview-grading-rubrics' },
+  { name: 'Lenny\'s Newsletter — mastering product sense interviews', url: 'https://www.lennysnewsletter.com/p/the-definitive-guide-to-mastering' },
+  { name: 'Aakash Gupta — cracking the execution interview', url: 'https://www.news.aakashg.com/p/crack-the-product-execution-interview' }
+];
+function caseRefs(c) {
+  if (c.id.startsWith('a-')) return window.PM_CASES_A_SOURCES || [];
+  if (c.id.startsWith('b-')) return window.PM_CASES_B_SOURCES || [];
+  return BASE_REFS;
+}
+function sourceCard(kind, x) {
+  const a = (s) => '<a href="' + esc(s.url) + '" rel="noopener" target="_blank">' + esc(s.name) + '</a>';
+  let body;
+  if (kind === 'bank') {
+    const s = SOURCES[x.src];
+    body = s
+      ? '<p style="margin:0">' + a(s) + '</p>' +
+        '<p class="muted" style="margin:6px 0 0">' + (x.co && x.co !== 'General' ? 'Reported at <b>' + esc(x.co) + '</b>. ' : 'A common question, not tied to one company. ') +
+        'Question paraphrased from this source; the answer guidance on this page is generic for the category.</p>'
+      : '<p class="muted" style="margin:0">No source recorded.</p>';
+  } else {
+    const sim = similarQuestions(x);
+    const refs = caseRefs(x);
+    const fictional = x.id.startsWith('a-') || x.id.startsWith('b-');
+    body = '<p style="margin:0"><b>Original case</b> written for PM Case Practice, built on a widely reported question type. ' +
+      (fictional ? 'The company is fictional and the data is illustrative.' : 'The scenario and data are illustrative, not real company figures.') + '</p>' +
+      (sim.length ? '<p class="muted" style="margin:12px 0 4px">Closest reported interview questions:</p><ul>' +
+        sim.map((q) => '<li>' + esc(q.q) + ' <span class="muted">— ' + esc(q.co || 'General') + ', ' + a(SOURCES[q.src]) + '</span></li>').join('') + '</ul>' : '') +
+      (refs.length ? '<details style="margin-top:10px"><summary class="muted" style="cursor:pointer">References used for structure and benchmarks (' + refs.length + ')</summary><ul style="margin-top:6px">' +
+        refs.map((s) => '<li>' + a(s) + '</li>').join('') + '</ul></details>' : '');
+  }
+  return card('link', 'Source', body);
+}
 
 /* ---------- state ---------- */
 const store = {
@@ -601,6 +644,8 @@ function openItem(kind, id, resetTimer = true) {
       '<span class="prop">' + icon('clock') + min + ' min</span>' +
       (x.style ? '<span class="prop"><span class="k">Style</span>' + esc(x.style) + '</span>' : '') +
       (x.co ? '<span class="prop"><span class="k">Reported at</span>' + esc(x.co) + '</span>' : '') +
+      (kind === 'bank' && SOURCES[x.src] ? '<a class="prop" href="' + esc(SOURCES[x.src].url) + '" rel="noopener" target="_blank">' + icon('link') + '<span class="k">Source</span>' + esc(SOURCES[x.src].name) + '</a>' : '') +
+      (kind === 'case' ? '<span class="prop">' + icon('doc') + '<span class="k">Source</span>Original case · illustrative data</span>' : '') +
       (kind === 'case' && x.exhibits && x.exhibits.length ? '<span class="prop">' + icon('table') + x.exhibits.length + ' exhibit' + (x.exhibits.length > 1 ? 's' : '') + '</span>' : '') +
     '</div>';
 
@@ -609,7 +654,7 @@ function openItem(kind, id, resetTimer = true) {
   el.hidden = false;
 
   if (!role) {
-    el.innerHTML = html + roleChooser();
+    el.innerHTML = html + roleChooser() + '<div style="margin-top:16px;max-width:560px">' + sourceCard(kind, x) + '</div>';
     $('#backlist').addEventListener('click', backToList);
     el.querySelectorAll('.role').forEach((b) => b.addEventListener('click', () => setRole(b.dataset.role)));
     syncHash();
@@ -618,10 +663,9 @@ function openItem(kind, id, resetTimer = true) {
   }
 
   // ---- main column: the case packet (shared) + role-specific tools ----
-  const src = kind === 'bank' && SOURCES[x.src] ? '<p class="src-line">Source: <a href="' + esc(SOURCES[x.src].url) + '" rel="noopener" target="_blank">' + esc(SOURCES[x.src].name) + '</a></p>' : '';
   let main =
     '<div class="card prompt-card"><div class="card-b"><p class="say">' + (iv ? 'Read this aloud' : 'Your interviewer asks') + '</p>' +
-    '<div class="text">' + esc(kind === 'case' ? x.prompt : x.q) + '</div>' + src + '</div></div>';
+    '<div class="text">' + esc(kind === 'case' ? x.prompt : x.q) + '</div></div></div>';
   if (kind === 'case' && x.brief && x.brief.length) main += card('doc', 'Case brief', '<ul>' + li(x.brief) + '</ul>');
   if (kind === 'case' && x.exhibits && x.exhibits.length) {
     main += '<div class="card"><div class="card-h">' + icon('table') + 'Data<span class="right">' + x.exhibits.length + ' exhibit' + (x.exhibits.length > 1 ? 's' : '') + '</span></div>' + x.exhibits.map(exhibitHtml).join('') + '</div>';
@@ -673,6 +717,7 @@ function openItem(kind, id, resetTimer = true) {
       '<div class="btn-row"><button class="btn sm" data-link="' + partner + '">' + icon('link') + 'Copy ' + partner + ' link</button>' +
       '<button class="btn ghost sm" id="switchside">' + icon('swap') + 'Switch side</button></div><div class="copied" id="copied"></div>' +
     '</div></div>' +
+    sourceCard(kind, x) +
     frameworkCard(false);
 
   el.innerHTML = html + '<div class="layout"><div class="main">' + main + '</div><aside class="aside">' + aside + '</aside></div>';
