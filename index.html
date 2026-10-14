@@ -258,13 +258,33 @@
   .role ul { margin: 0; padding-left: 18px; color: var(--text-2); font-size: 13px; }
   .role .cta { margin-top: auto; color: var(--accent); font-weight: 600; font-size: 13px; display: inline-flex; align-items: center; gap: 4px; }
 
+  /* videos */
+  .vcard { padding: 0; overflow: hidden; gap: 8px; }
+  .vcard > .row, .vcard > .title, .vcard > .meta { padding: 0 14px; }
+  .vcard > .meta { padding-bottom: 14px; }
+  .thumb { position: relative; display: block; aspect-ratio: 16 / 9; background: var(--hover); border-bottom: 1px solid var(--border); }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .play { position: absolute; inset: 0; display: grid; place-items: center; }
+  .play svg.i { width: 44px; height: 44px; padding: 12px; border-radius: 50%; background: rgba(15,15,20,.65); color: #fff; stroke: none; transition: transform .12s; }
+  .vcard:hover .play svg.i { transform: scale(1.08); background: var(--accent); }
+  .player { overflow: hidden; aspect-ratio: 16 / 9; background: #000; }
+  .player iframe { width: 100%; height: 100%; border: 0; display: block; }
+  ul.plain { list-style: none; padding: 0 !important; margin: 0; }
+  ul.plain li { margin: 0 0 6px !important; }
+  .linkbtn { border: 0; background: none; padding: 0; text-align: left; color: var(--text); font-weight: 500; line-height: 1.4; }
+  .linkbtn:hover { color: var(--accent); }
+  .linkbtn .mono { color: var(--text-3); margin-right: 4px; }
+
   /* footer */
   footer { margin: 56px 0 40px; padding-top: 20px; border-top: 1px solid var(--border); color: var(--text-3); font-size: 12.5px; }
   footer details summary { cursor: pointer; color: var(--text-2); font-weight: 500; }
   footer ul { columns: 2 18rem; padding-left: 18px; margin: 10px 0 0; }
   footer li { margin: 3px 0; break-inside: avoid; }
 
+  .nav .sm { display: none; }
   @media (max-width: 640px) {
+    .nav .lg { display: none; } .nav .sm { display: inline; }
+    .nav .count { display: none; }
     .topbar .wrap { gap: 8px; }
     .brand .name { display: none; }
     .nav { margin-left: 0; }
@@ -284,7 +304,8 @@
     <button class="brand" id="home" aria-label="PM Case Practice home"><span class="logo">PM</span><span class="name">Case Practice</span></button>
     <nav class="nav" role="tablist" aria-label="Library">
       <button role="tab" data-tab="cases" aria-selected="true">Cases <span class="count" id="n-cases"></span></button>
-      <button role="tab" data-tab="bank" aria-selected="false">Question bank <span class="count" id="n-bank"></span></button>
+      <button role="tab" data-tab="bank" aria-selected="false"><span class="lg">Question bank</span><span class="sm">Bank</span> <span class="count" id="n-bank"></span></button>
+      <button role="tab" data-tab="videos" aria-selected="false"><span class="lg">Watch a real mock</span><span class="sm">Mocks</span> <span class="count" id="n-videos"></span></button>
     </nav>
     <span class="spacer"></span>
     <span class="progress-chip" id="progress"></span>
@@ -321,7 +342,7 @@
   <section id="case" hidden aria-live="polite"></section>
 
   <footer>
-    <p>Full cases use fictional or clearly illustrative data built around question types widely reported from PM loops. Bank questions are paraphrased from public sources and tagged by the company they were reported at. Rubrics adapt publicly described evaluation criteria — no company's internal rubric is reproduced.</p>
+    <p>Full cases use fictional or clearly illustrative data built around question types widely reported from PM loops. Bank questions are paraphrased from public sources and tagged by the company they were reported at. Rubrics adapt publicly described evaluation criteria — no company's internal rubric is reproduced. Mock interview videos are embedded from YouTube and belong to their creators; titles and channels come straight from YouTube.</p>
     <details><summary>Sources (<span id="n-sources"></span>)</summary><ul id="sources"></ul></details>
   </footer>
 </main>
@@ -331,6 +352,7 @@
 <script src="pm/cases-b.js"></script>
 <script src="pm/bank.js"></script>
 <script src="pm/related.js"></script>
+<script src="pm/videos.js"></script>
 <script>
 /* ---------- frameworks, rubrics and generic probes per category ---------- */
 const CATS = {
@@ -403,6 +425,12 @@ const CASES = [].concat(window.PM_CASES_CORE || [], window.PM_CASES_A || [], win
 const hashId = (s) => { let h = 5381; for (let i = 0; i < s.length; i++) h = ((h * 33) ^ s.charCodeAt(i)) >>> 0; return h.toString(36); };
 const BANK = (window.PM_BANK || []).filter((q) => CATS[q.cat]).map((q) => Object.assign({ id: hashId(q.q) }, q));
 const SOURCES = window.PM_SOURCES || {};
+const VIDEOS = (window.PM_VIDEOS || []).filter((v) => CATS[v.cat]);
+// Each library tab holds one kind of item.
+const KIND = { cases: 'case', bank: 'bank', videos: 'video' };
+const TAB_OF = { case: 'cases', bank: 'bank', video: 'videos' };
+const LIST_OF = { case: CASES, bank: BANK, video: VIDEOS };
+const HASH_KEY = { case: 'case', bank: 'q', video: 'v' };
 
 /* ---------- provenance ---------- */
 // Full cases are written for this app, so instead of inventing a source we show the
@@ -461,6 +489,7 @@ const done = new Set(store.get('done', []));
 const pad = (n) => String(n).padStart(3, '0');
 CASES.forEach((c, i) => { c.key = 'PM-' + pad(i + 1); });
 BANK.forEach((q, i) => { q.key = 'Q-' + pad(i + 1); });
+VIDEOS.forEach((v, i) => { v.key = 'V-' + pad(i + 1); });
 
 const $ = (s, el = document) => el.querySelector(s);
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -484,7 +513,9 @@ const ICONS = {
   swap: '<path d="M7 4L3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7"/>',
   arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>',
   chev: '<path d="M9 6l6 6-6 6"/>',
-  flag: '<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>'
+  flag: '<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>',
+  play: '<path d="M8 5v14l11-7z" fill="currentColor"/>',
+  video: '<rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3"/>'
 };
 const icon = (n, cls = '') => '<svg class="i ' + cls + '" viewBox="0 0 24 24" aria-hidden="true">' + ICONS[n] + '</svg>';
 const LVL = { Easy: 1, Medium: 2, Hard: 3 };
@@ -494,8 +525,9 @@ const card = (ic, title, body, right) => '<div class="card"><div class="card-h">
 
 /* ---------- header stats ---------- */
 function renderProgress() {
-  const total = CASES.length + BANK.length;
-  const n = [...done].filter((id) => CASES.some((c) => c.id === id) || BANK.some((q) => q.id === id)).length;
+  const all = [...CASES, ...BANK, ...VIDEOS];
+  const total = all.length;
+  const n = all.filter((x) => done.has(x.id)).length;
   const pct = total ? n / total : 0;
   const r = 7, len = 2 * Math.PI * r;
   $('#progress').innerHTML = '<svg class="ring" viewBox="0 0 18 18"><circle cx="9" cy="9" r="' + r + '" fill="none" stroke="var(--border-2)" stroke-width="2.5"/>' +
@@ -504,7 +536,7 @@ function renderProgress() {
 }
 function renderKpis() {
   const withData = CASES.filter((c) => c.exhibits && c.exhibits.length).length;
-  const k = [[CASES.length, 'Full cases'], [withData, 'With data exhibits'], [BANK.length, 'Bank questions'], [Object.keys(CATS).length, 'Categories']];
+  const k = [[CASES.length, 'Full cases'], [withData, 'With data exhibits'], [BANK.length, 'Bank questions'], [VIDEOS.length, 'Real mock videos']];
   $('#kpis').innerHTML = k.map(([v, l]) => '<div class="kpi"><div class="v">' + v + '</div><div class="l">' + l + '</div></div>').join('');
 }
 
@@ -530,17 +562,29 @@ function pickNew(kind, id) { role = null; openItem(kind, id); }
 /* ---------- tabs + filters ---------- */
 $('#n-cases').textContent = CASES.length;
 $('#n-bank').textContent = BANK.length;
+$('#n-videos').textContent = VIDEOS.length;
 document.querySelectorAll('.nav button').forEach((t) => t.addEventListener('click', () => setTab(t.dataset.tab)));
 $('#home').addEventListener('click', () => { role = null; setTab('cases'); window.scrollTo({ top: 0, behavior: 'smooth' }); });
+const TAB_TEXT = {
+  cases: ['Cases', 'Search cases, companies, industries…'],
+  bank: ['Question bank', 'Search questions, companies, sources…'],
+  videos: ['Watch a real mock', 'Search videos, channels, companies…']
+};
+// Sync the nav and filter controls to `tab` (without touching the list).
+function applyTab() {
+  document.querySelectorAll('.nav button').forEach((x) => x.setAttribute('aria-selected', String(x.dataset.tab === tab)));
+  $('#co').hidden = tab === 'cases';
+  $('#lvl').hidden = tab === 'videos';
+  $('#list-title').textContent = TAB_TEXT[tab][0];
+  $('#search').placeholder = TAB_TEXT[tab][1];
+  renderCompanies(); renderCats();
+}
 function setTab(t) {
   tab = t; shown = PAGE;
-  document.querySelectorAll('.nav button').forEach((x) => x.setAttribute('aria-selected', String(x.dataset.tab === t)));
-  $('#co').hidden = t !== 'bank';
-  $('#list-title').textContent = t === 'cases' ? 'Cases' : 'Question bank';
-  $('#search').placeholder = t === 'cases' ? 'Search cases, companies, industries…' : 'Search questions, companies, sources…';
-  closeItem(); renderCats(); renderList();
+  $('#co').value = '';
+  closeItem(); applyTab(); renderList();
 }
-function pool() { return tab === 'cases' ? CASES : BANK; }
+function pool() { return LIST_OF[KIND[tab]]; }
 function renderCats() {
   const counts = {};
   pool().forEach((x) => { counts[x.cat] = (counts[x.cat] || 0) + 1; });
@@ -550,9 +594,13 @@ function renderCats() {
     (k === 'all' ? '' : '<span class="dot"></span>') + esc(n) + '<span class="c">' + c + '</span></button>').join('');
   $('#cats').querySelectorAll('.label-chip').forEach((c) => c.addEventListener('click', () => { cat = c.dataset.cat; shown = PAGE; renderCats(); renderList(); }));
 }
+// Bank: filter by company; videos: filter by channel.
+const facet = (x) => tab === 'videos' ? x.ch : x.co;
 function renderCompanies() {
-  const cos = [...new Set(BANK.map((q) => q.co).filter(Boolean))].sort((a, b) => a === 'General' ? 1 : b === 'General' ? -1 : a.localeCompare(b));
-  $('#co').innerHTML = '<option value="">Any company</option>' + cos.map((c) => '<option>' + esc(c) + '</option>').join('');
+  const keep = $('#co').value;
+  const vals = [...new Set(pool().map(facet).filter(Boolean))].sort((a, b) => a === 'General' ? 1 : b === 'General' ? -1 : a.localeCompare(b));
+  $('#co').innerHTML = '<option value="">' + (tab === 'videos' ? 'Any channel' : 'Any company') + '</option>' + vals.map((c) => '<option>' + esc(c) + '</option>').join('');
+  $('#co').value = vals.includes(keep) ? keep : '';
 }
 ['#search', '#lvl', '#co'].forEach((s) => $(s).addEventListener('input', () => { shown = PAGE; closeItem(); renderList(); }));
 
@@ -562,23 +610,30 @@ function filtered() {
   const co = $('#co').value;
   return pool().filter((x) => {
     if (cat !== 'all' && x.cat !== cat) return false;
-    if (lvl && x.lvl !== lvl) return false;
-    if (tab === 'bank' && co && x.co !== co) return false;
+    if (lvl && tab !== 'videos' && x.lvl !== lvl) return false;
+    if (tab !== 'cases' && co && facet(x) !== co) return false;
     if (!term) return true;
-    const hay = (tab === 'cases'
-      ? [x.key, x.title, x.prompt, x.style, (x.brief || []).join(' ')]
-      : [x.key, x.q, x.co, (SOURCES[x.src] || {}).name]).join(' ').toLowerCase();
+    const hay = (tab === 'cases' ? [x.key, x.title, x.prompt, x.style, (x.brief || []).join(' ')]
+      : tab === 'bank' ? [x.key, x.q, x.co, (SOURCES[x.src] || {}).name]
+      : [x.key, x.title, x.q, x.ch, x.co]).join(' ').toLowerCase();
     return hay.includes(term);
   });
 }
 function renderList() {
   $('#picker').hidden = false;
   const items = filtered();
-  $('#rcount').textContent = items.length + ' ' + (tab === 'cases' ? 'case' : 'question') + (items.length === 1 ? '' : 's');
+  $('#rcount').textContent = items.length + ' ' + ({ cases: 'case', bank: 'question', videos: 'video' })[tab] + (items.length === 1 ? '' : 's');
   const list = $('#list');
-  list.className = tab === 'cases' ? 'grid' : 'rows';
-  const status = (x) => done.has(x.id) ? '<span class="status">' + icon('check') + 'Done</span>' : '';
+  list.className = tab === 'bank' ? 'rows' : tab === 'videos' ? 'grid vgrid' : 'grid';
+  const status = (x) => done.has(x.id) ? '<span class="status">' + icon('check') + (tab === 'videos' ? 'Watched' : 'Done') + '</span>' : '';
   list.innerHTML = items.slice(0, shown).map((x) => {
+    if (tab === 'videos') {
+      return '<li><button class="ticket vcard" data-id="' + esc(x.id) + '">' +
+        '<span class="thumb"><img src="https://i.ytimg.com/vi/' + esc(x.id) + '/mqdefault.jpg" alt="" loading="lazy"><span class="play">' + icon('play') + '</span></span>' +
+        '<span class="row">' + catTag(x.cat) + status(x) + '</span>' +
+        '<span class="title">' + esc(x.title) + '</span>' +
+        '<span class="meta"><span>' + icon('video') + esc(x.ch) + '</span>' + (x.co && x.co !== 'General' ? '<span>' + esc(x.co) + '</span>' : '') + '</span></button></li>';
+    }
     if (tab === 'cases') {
       const hasData = x.exhibits && x.exhibits.length;
       return '<li><button class="ticket" data-id="' + esc(x.id) + '">' +
@@ -592,7 +647,7 @@ function renderList() {
       '<span class="q">' + esc(x.q) + '</span>' +
       '<span class="side">' + status(x) + catTag(x.cat) + '<span class="co">' + esc(x.co || 'General') + '</span></span></button></li>';
   }).join('');
-  list.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => pickNew(tab === 'cases' ? 'case' : 'bank', b.dataset.id)));
+  list.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => pickNew(KIND[tab], b.dataset.id)));
   $('#more').hidden = items.length <= shown;
   $('#more').textContent = 'Show more · ' + (items.length - shown) + ' left';
 }
@@ -602,7 +657,7 @@ $('#random').addEventListener('click', () => {
   if (!items.length) return;
   const fresh = items.filter((x) => !done.has(x.id));
   const from = fresh.length ? fresh : items;
-  pickNew(tab === 'cases' ? 'case' : 'bank', from[Math.floor(Math.random() * from.length)].id);
+  pickNew(KIND[tab], from[Math.floor(Math.random() * from.length)].id);
 });
 
 /* ---------- detail view ---------- */
@@ -616,16 +671,49 @@ function exhibitHtml(e) {
 function closeItem() { current = null; stopTimer(true); $('#case').hidden = true; $('#case').innerHTML = ''; $('#picker').hidden = false; syncHash(); }
 function backToList() { role = null; closeItem(); renderList(); window.scrollTo({ top: $('#list-title').offsetTop - 80, behavior: 'smooth' }); }
 
+function openVideo(x) {
+  current = { kind: 'video', item: x };
+  stopTimer(true);
+  const k = CATS[x.cat];
+  // Suggest cases of the same type to practise after watching (not yet done first).
+  const same = CASES.filter((c) => c.cat === x.cat);
+  const practice = same.filter((c) => !done.has(c.id)).concat(same.filter((c) => done.has(c.id))).slice(0, 4);
+  const yt = 'https://www.youtube.com/watch?v=' + encodeURIComponent(x.id);
+  const el = $('#case');
+  $('#picker').hidden = true;
+  el.hidden = false;
+  el.innerHTML =
+    '<nav class="crumbs"><button id="backlist">Watch a real mock</button>' + icon('chev') + '<span>' + esc(k.name) + '</span>' + icon('chev') + '<span class="mono">' + x.key + '</span></nav>' +
+    '<h1 class="detail-title">' + esc(x.title) + '</h1>' +
+    '<div class="props"><span class="prop" data-cat="' + x.cat + '"><span class="dot"></span>' + esc(k.name) + '</span>' +
+      '<a class="prop" href="' + esc(x.chUrl || yt) + '" rel="noopener" target="_blank">' + icon('video') + '<span class="k">Channel</span>' + esc(x.ch) + '</a>' +
+      (x.co && x.co !== 'General' ? '<span class="prop"><span class="k">Company</span>' + esc(x.co) + '</span>' : '') + '</div>' +
+    '<div class="layout"><div class="main">' +
+      '<div class="card player"><iframe src="https://www.youtube-nocookie.com/embed/' + encodeURIComponent(x.id) + '?rel=0" title="' + esc(x.title) + '" ' +
+        'allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe></div>' +
+      (x.q ? '<div class="card prompt-card"><div class="card-b"><p class="say">The question in this mock</p><div class="text">' + esc(x.q) + '</div></div></div>' : '') +
+      '<div class="callout">' + icon('bulb') + '<div><b>How to use it.</b> Pause after the question and sketch your own answer first, then compare structure, clarifying questions and how they prioritise.</div></div>' +
+    '</div><aside class="aside">' +
+      card('link', 'Source', '<p style="margin:0"><a href="' + esc(yt) + '" rel="noopener" target="_blank">Watch on YouTube</a></p>' +
+        '<p class="muted" style="margin:6px 0 0">Published by <a href="' + esc(x.chUrl || yt) + '" rel="noopener" target="_blank">' + esc(x.ch) + '</a>. Embedded from YouTube; all rights belong to the creator.</p>') +
+      card('flag', 'Practise this type', practice.length ? '<ul class="plain">' + practice.map((c) =>
+        '<li><button class="linkbtn" data-case="' + esc(c.id) + '"><span class="mono">' + c.key + '</span> ' + esc(c.title) + '</button></li>').join('') + '</ul>' : '<p class="muted" style="margin:0">No full cases in this category yet.</p>') +
+      frameworkCard(k, true) +
+    '</aside></div>';
+  $('#backlist').addEventListener('click', backToList);
+  el.querySelectorAll('[data-case]').forEach((b) => b.addEventListener('click', () => pickNew('case', b.dataset.case)));
+  markDone(x.id);
+  syncHash();
+  window.scrollTo({ top: 0 });
+}
+const frameworkCard = (k, open) => '<details class="card"' + (open ? ' open' : '') + '><summary class="card-h">' + icon('list') + 'Framework · ' + esc(k.name) + icon('chev', 'chev') + '</summary>' +
+  '<div class="card-b"><ol class="framework">' + li(k.framework) + '</ol></div></details>';
+
 function openItem(kind, id, resetTimer = true) {
-  const list = kind === 'case' ? CASES : BANK;
-  const x = list.find((c) => c.id === id);
+  const x = LIST_OF[kind].find((c) => c.id === id);
   if (!x) return;
-  if (kind !== (tab === 'cases' ? 'case' : 'bank')) {
-    tab = kind === 'case' ? 'cases' : 'bank';
-    document.querySelectorAll('.nav button').forEach((t) => t.setAttribute('aria-selected', String(t.dataset.tab === tab)));
-    $('#co').hidden = tab !== 'bank';
-    renderCats();
-  }
+  if (TAB_OF[kind] !== tab) { tab = TAB_OF[kind]; applyTab(); }
+  if (kind === 'video') return openVideo(x);
   current = { kind, item: x };
   if (resetTimer) stopTimer(true);
   const k = CATS[x.cat];
@@ -680,8 +768,6 @@ function openItem(kind, id, resetTimer = true) {
     '</div>' +
     (x.traps ? card('alert', 'Watch for', '<ul>' + li(x.traps) + '</ul>') : '');
 
-  const frameworkCard = (open) => '<details class="card"' + (open ? ' open' : '') + '><summary class="card-h">' + icon('list') + 'Framework · ' + esc(k.name) + icon('chev', 'chev') + '</summary>' +
-    '<div class="card-b"><ol class="framework">' + li(k.framework) + '</ol></div></details>';
 
   if (iv) {
     main +=
@@ -718,7 +804,7 @@ function openItem(kind, id, resetTimer = true) {
       '<button class="btn ghost sm" id="switchside">' + icon('swap') + 'Switch side</button></div><div class="copied" id="copied"></div>' +
     '</div></div>' +
     sourceCard(kind, x) +
-    frameworkCard(false);
+    frameworkCard(k, false);
 
   el.innerHTML = html + '<div class="layout"><div class="main">' + main + '</div><aside class="aside">' + aside + '</aside></div>';
 
@@ -791,11 +877,11 @@ function renderClock() {
 function syncHash() {
   const parts = [];
   if (role) parts.push('role=' + role);
-  if (current) parts.push((current.kind === 'case' ? 'case=' : 'q=') + current.item.id);
+  if (current) parts.push(HASH_KEY[current.kind] + '=' + current.item.id);
   history.replaceState(null, '', parts.length ? '#' + parts.join('&') : location.pathname);
 }
 function copyLink(forRole) {
-  const key = current.kind === 'case' ? 'case=' : 'q=';
+  const key = HASH_KEY[current.kind] + '=';
   const url = location.origin + location.pathname + '#role=' + forRole + '&' + key + current.item.id;
   const ok = () => { $('#copied').textContent = 'Link copied — send it to your partner.'; setTimeout(() => { const c = $('#copied'); if (c) c.textContent = ''; }, 2500); };
   if (navigator.clipboard) navigator.clipboard.writeText(url).then(ok, () => prompt('Copy this link:', url));
@@ -821,16 +907,17 @@ function copyLink(forRole) {
 /* ---------- boot ---------- */
 renderKpis();
 renderProgress();
-renderCompanies();
-renderCats();
+applyTab();
 // Also runs on hashchange, so a shared link pasted into an open tab works (replaceState doesn't fire it).
 function boot() {
   const p = new URLSearchParams(location.hash.slice(1));
   const r = p.get('role');
-  const cid = p.get('case'), qid = p.get('q');
   current = null;
-  if (cid && CASES.some((c) => c.id === cid)) current = { kind: 'case', item: CASES.find((c) => c.id === cid) };
-  else if (qid && BANK.some((q) => q.id === qid)) current = { kind: 'bank', item: BANK.find((q) => q.id === qid) };
+  for (const kind of ['case', 'bank', 'video']) {
+    const id = p.get(HASH_KEY[kind]);
+    const item = id && LIST_OF[kind].find((x) => x.id === id);
+    if (item) { current = { kind, item }; break; }
+  }
   role = r === 'interviewer' || r === 'candidate' ? r : null;
   if (current) openItem(current.kind, current.item.id); else renderList();
 }
