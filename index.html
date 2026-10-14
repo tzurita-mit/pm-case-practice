@@ -5,252 +5,325 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>PM Case Practice</title>
 <meta name="description" content="Free PM interview practice: data-rich product management cases and a big question bank. Pick a case, then play the interviewer or the candidate.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%235e5ce6'/%3E%3Ctext x='16' y='21' font-family='Arial' font-weight='700' font-size='13' fill='white' text-anchor='middle'%3EPM%3C/text%3E%3C/svg%3E">
 <style>
   :root {
-    --paper:      #fbfaf7;
-    --card:       #ffffff;
-    --ink:        #1a1a18;
-    --ink-soft:   #4a4a46;
-    --ink-faint:  #77756e;
-    --navy:       #1f3a5f;
-    --navy-wash:  #e9eef5;
-    --amber:      #8a5a00;
-    --amber-wash: #f7efdc;
-    --rule:       #ddd9d0;
-    --rule-soft:  #e8e5de;
+    --bg:          #f6f6f7;
+    --surface:     #ffffff;
+    --surface-2:   #fafafb;
+    --hover:       #f2f2f4;
+    --border:      #e5e5e9;
+    --border-2:    #d6d6dc;
+    --text:        #17171c;
+    --text-2:      #55555f;
+    --text-3:      #8a8a95;
+    --accent:      #5e5ce6;
+    --accent-2:    #4b49c9;
+    --accent-soft: #efeffd;
+    --on-accent:   #ffffff;
+    --good:        #12935a;
+    --good-soft:   #e7f6ee;
+    --warn:        #c27a06;
+    --warn-soft:   #fdf4e3;
+    --shadow:      0 1px 2px rgba(16,16,24,.04), 0 1px 3px rgba(16,16,24,.06);
+    --shadow-lg:   0 8px 24px rgba(16,16,24,.08), 0 2px 6px rgba(16,16,24,.05);
 
-    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, "Times New Roman", serif;
-    --sans:  ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    --page:  52rem;
+    --c-design: #8b5cf6; --c-improve: #3b82f6; --c-metrics: #10b981; --c-rca: #ef4444; --c-estimate: #f59e0b;
+    --c-strategy: #14b8a6; --c-gtm: #ec4899; --c-technical: #64748b; --c-behavioral: #f97316; --c-ai: #6366f1;
+
+    --font: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --radius: 10px;
+    --page: 72rem;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --paper:      #16161a;
-      --card:       #1d1d22;
-      --ink:        #ece9e3;
-      --ink-soft:   #b3afa7;
-      --ink-faint:  #8d8a83;
-      --navy:       #9db8dc;
-      --navy-wash:  #222b38;
-      --amber:      #e0b45c;
-      --amber-wash: #2c2618;
-      --rule:       #34343b;
-      --rule-soft:  #26262c;
+      --bg: #0e0e11; --surface: #16161a; --surface-2: #1b1b20; --hover: #212127;
+      --border: #27272e; --border-2: #34343c; --text: #ececef; --text-2: #a5a5b0; --text-3: #6f6f7a;
+      --accent: #8583ff; --accent-2: #9d9bff; --accent-soft: #23224a; --on-accent: #0e0e11;
+      --good: #3ccf8e; --good-soft: #13291f; --warn: #f0b44c; --warn-soft: #2c2412;
+      --shadow: 0 1px 2px rgba(0,0,0,.3); --shadow-lg: 0 8px 24px rgba(0,0,0,.4);
     }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0e0e11; --surface: #16161a; --surface-2: #1b1b20; --hover: #212127;
+    --border: #27272e; --border-2: #34343c; --text: #ececef; --text-2: #a5a5b0; --text-3: #6f6f7a;
+    --accent: #8583ff; --accent-2: #9d9bff; --accent-soft: #23224a; --on-accent: #0e0e11;
+    --good: #3ccf8e; --good-soft: #13291f; --warn: #f0b44c; --warn-soft: #2c2412;
+    --shadow: 0 1px 2px rgba(0,0,0,.3); --shadow-lg: 0 8px 24px rgba(0,0,0,.4);
   }
 
   *, *::before, *::after { box-sizing: border-box; }
   html { -webkit-text-size-adjust: 100%; }
   body {
-    margin: 0;
-    padding-block: clamp(2.5rem, 7vw, 5rem) clamp(3rem, 7vw, 5rem);
-    padding-inline: max(1rem, calc((100vw - var(--page)) / 2));
-    background: var(--paper);
-    color: var(--ink);
-    font-family: var(--sans);
-    line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: var(--font); font-size: 14px; line-height: 1.55;
+    -webkit-font-smoothing: antialiased; font-feature-settings: "cv11", "ss01";
   }
-  a { color: var(--navy); text-decoration: none; border-bottom: 1px solid color-mix(in srgb, var(--navy) 35%, transparent); }
-  a:hover { border-bottom-color: var(--navy); }
-  button, select, textarea { font: inherit; color: inherit; }
-  :focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  button, select, input, textarea { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+  [hidden] { display: none !important; }
+  .wrap { max-width: var(--page); margin: 0 auto; padding: 0 16px; }
+  .mono { font-family: var(--mono); font-size: 0.92em; letter-spacing: -0.01em; }
+  svg.i { width: 16px; height: 16px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 
-  .back { font-size: 0.8125rem; color: var(--ink-faint); }
-  h1 {
-    font-family: var(--serif); font-weight: 400;
-    font-size: clamp(2.1rem, 7vw, 3.1rem); line-height: 1.08; letter-spacing: -0.02em;
-    margin: 0.9rem 0 0;
-  }
-  .lede { font-family: var(--serif); font-style: italic; color: var(--ink-soft); font-size: 1.125rem; max-width: 36rem; margin: 0.8rem 0 0; }
-  hr.rule { border: 0; border-top: 1px solid var(--ink); opacity: 0.85; margin: 2rem 0; }
+  /* ---------- top bar ---------- */
+  .topbar { position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--surface) 88%, transparent); backdrop-filter: saturate(1.4) blur(10px); border-bottom: 1px solid var(--border); }
+  .topbar .wrap { display: flex; align-items: center; gap: 14px; height: 56px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 15px; color: var(--text); background: none; border: 0; padding: 0; }
+  .logo { width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; color: #fff; font-size: 11px; font-weight: 700; letter-spacing: .02em; background: linear-gradient(135deg, #7c7aff, #5e5ce6 55%, #4338ca); box-shadow: inset 0 0 0 1px rgba(255,255,255,.15); }
+  .nav { display: flex; gap: 2px; padding: 3px; background: var(--hover); border-radius: 9px; margin-left: 10px; }
+  .nav button { border: 0; background: none; padding: 5px 12px; border-radius: 7px; font-weight: 500; color: var(--text-2); display: flex; align-items: center; gap: 6px; }
+  .nav button[aria-selected="true"] { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
+  .nav .count { font-size: 11px; color: var(--text-3); font-weight: 500; }
+  .topbar .spacer { flex: 1; }
+  .progress-chip { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--text-2); }
+  .ring { width: 18px; height: 18px; }
 
-  .label {
-    font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase;
-    color: var(--ink-faint); margin: 0 0 0.8rem;
-  }
+  /* ---------- hero ---------- */
+  .hero { padding: 40px 0 8px; }
+  .eyebrow { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; color: var(--accent); background: var(--accent-soft); padding: 3px 10px; border-radius: 999px; }
+  .hero h1 { font-size: clamp(28px, 5vw, 40px); line-height: 1.12; letter-spacing: -0.025em; font-weight: 700; margin: 14px 0 0; max-width: 40rem; }
+  .hero p.sub { font-size: 16px; color: var(--text-2); margin: 10px 0 0; max-width: 38rem; }
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 24px; }
+  .step { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; display: flex; gap: 12px; align-items: flex-start; box-shadow: var(--shadow); }
+  .step .n { font-family: var(--mono); font-size: 11px; color: var(--accent); background: var(--accent-soft); border-radius: 6px; padding: 2px 6px; margin-top: 1px; }
+  .step b { display: block; font-weight: 600; }
+  .step span { color: var(--text-2); font-size: 13px; }
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-top: 10px; }
+  .kpi { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; box-shadow: var(--shadow); }
+  .kpi .v { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
+  .kpi .l { font-size: 12px; color: var(--text-3); }
 
-  /* ---------- role picker ---------- */
-  .roles { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 0.9rem; }
-  .role {
-    text-align: left; background: var(--card); border: 1px solid var(--rule); border-radius: 10px;
-    padding: 1.1rem 1.2rem; cursor: pointer; transition: border-color .15s, background .15s;
-  }
-  .role:hover { border-color: var(--ink-faint); }
-  .role[aria-pressed="true"] { border-color: var(--navy); background: var(--navy-wash); box-shadow: inset 0 0 0 1px var(--navy); }
-  .role strong { display: block; font-family: var(--serif); font-weight: 400; font-size: 1.3rem; }
-  .role span { font-size: 0.875rem; color: var(--ink-soft); }
+  /* ---------- filters ---------- */
+  .section-h { display: flex; align-items: baseline; gap: 10px; margin: 32px 0 12px; }
+  .section-h h2 { font-size: 16px; font-weight: 600; margin: 0; letter-spacing: -0.01em; }
+  .section-h .muted { color: var(--text-3); font-size: 13px; }
+  .filterbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .search { flex: 1 1 260px; min-width: 0; display: flex; align-items: center; gap: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 0 10px; height: 34px; color: var(--text-3); }
+  .search input { border: 0; outline: 0; background: none; flex: 1; min-width: 0; height: 100%; color: var(--text); }
+  .select { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; height: 34px; padding: 0 28px 0 10px; appearance: none; -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 6l4 4 4-4' stroke='%238a8a95' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; background-size: 14px; }
+  .btn { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); font-weight: 500; color: var(--text); box-shadow: var(--shadow); white-space: nowrap; }
+  .btn:hover { background: var(--hover); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  .btn.primary:hover { background: var(--accent-2); }
+  .btn.sm { height: 28px; padding: 0 10px; font-size: 12.5px; }
+  .btn.ghost { box-shadow: none; background: none; border-color: transparent; color: var(--text-2); }
+  .btn.ghost:hover { background: var(--hover); color: var(--text); }
+  .labels { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .label-chip { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); font-size: 12.5px; font-weight: 500; color: var(--text-2); }
+  .label-chip:hover { border-color: var(--border-2); }
+  .label-chip .c { font-size: 11px; color: var(--text-3); }
+  .label-chip[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--text); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--cat, var(--text-3)); flex: none; }
 
-  /* ---------- toolbar ---------- */
-  .toolbar { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; margin-top: 1.6rem; }
-  .chips { display: flex; flex-wrap: wrap; gap: 0.4rem; }
-  .chip {
-    border: 1px solid var(--rule); background: transparent; border-radius: 999px;
-    padding: 0.28rem 0.8rem; font-size: 0.8125rem; cursor: pointer; color: var(--ink-soft);
-  }
-  .chip[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
-  .btn {
-    border: 1px solid var(--ink); background: var(--ink); color: var(--paper);
-    border-radius: 8px; padding: 0.45rem 0.95rem; font-size: 0.875rem; cursor: pointer;
-  }
-  .btn.ghost { background: transparent; color: var(--ink); border-color: var(--rule); }
-  .btn.ghost:hover { border-color: var(--ink-faint); }
-  .spacer { flex: 1; }
+  /* category colour hook */
+  [data-cat="design"] { --cat: var(--c-design); } [data-cat="improve"] { --cat: var(--c-improve); } [data-cat="metrics"] { --cat: var(--c-metrics); }
+  [data-cat="rca"] { --cat: var(--c-rca); } [data-cat="estimate"] { --cat: var(--c-estimate); } [data-cat="strategy"] { --cat: var(--c-strategy); }
+  [data-cat="gtm"] { --cat: var(--c-gtm); } [data-cat="technical"] { --cat: var(--c-technical); } [data-cat="behavioral"] { --cat: var(--c-behavioral); }
+  [data-cat="ai"] { --cat: var(--c-ai); }
+  .cat-tag { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; color: var(--text-2); padding: 2px 8px 2px 7px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); white-space: nowrap; }
 
-  /* ---------- case list ---------- */
-  .list { list-style: none; padding: 0; margin: 1.2rem 0 0; border-top: 1px solid var(--rule); }
-  .list li { border-bottom: 1px solid var(--rule-soft); }
-  .list button {
-    width: 100%; text-align: left; background: none; border: 0; padding: 0.8rem 0.2rem; cursor: pointer;
-    display: grid; grid-template-columns: 1fr auto; gap: 0.2rem 1rem; align-items: baseline;
-  }
-  .list button:hover .t { color: var(--navy); }
-  .list .t { font-family: var(--serif); font-size: 1.0625rem; }
-  .list .m { font-size: 0.75rem; color: var(--ink-faint); white-space: nowrap; }
-  .list .done::after { content: " ✓"; color: var(--navy); }
+  /* priority-style difficulty bars */
+  .prio { display: inline-flex; align-items: flex-end; gap: 2px; height: 12px; }
+  .prio i { width: 3px; border-radius: 1px; background: var(--border-2); }
+  .prio i:nth-child(1) { height: 5px; } .prio i:nth-child(2) { height: 8px; } .prio i:nth-child(3) { height: 12px; }
+  .prio.l1 i:nth-child(-n+1), .prio.l2 i:nth-child(-n+2), .prio.l3 i:nth-child(-n+3) { background: var(--text-2); }
+  .prio-wrap { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-2); }
 
-  /* ---------- case view ---------- */
-  .case { margin-top: 1.4rem; }
-  .case[hidden], [hidden] { display: none !important; }
-  .case-head { display: flex; flex-wrap: wrap; gap: 0.4rem 0.8rem; align-items: baseline; }
-  .tag { font-size: 0.75rem; letter-spacing: 0.04em; color: var(--ink-faint); }
-  .case h2 { font-family: var(--serif); font-weight: 400; font-size: clamp(1.5rem, 4.5vw, 2rem); line-height: 1.2; margin: 0.4rem 0 0; }
+  /* ---------- list ---------- */
+  .result-count { color: var(--text-3); font-size: 12.5px; margin: 14px 0 8px; }
+  .grid { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 10px; }
+  .ticket { width: 100%; height: 100%; text-align: left; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 10px; transition: border-color .12s, box-shadow .12s, transform .12s; }
+  .ticket:hover { border-color: var(--border-2); box-shadow: var(--shadow-lg); transform: translateY(-1px); }
+  .ticket .row { display: flex; align-items: center; gap: 8px; }
+  .ticket .id { font-family: var(--mono); font-size: 11.5px; color: var(--text-3); }
+  .ticket .title { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; line-height: 1.35; }
+  .ticket .meta { display: flex; flex-wrap: wrap; gap: 6px 12px; color: var(--text-3); font-size: 12.5px; margin-top: auto; }
+  .ticket .meta span { display: inline-flex; align-items: center; gap: 5px; }
+  .ticket .meta svg.i { width: 13px; height: 13px; }
+  .status { margin-left: auto; display: inline-flex; align-items: center; gap: 4px; font-size: 11.5px; font-weight: 500; padding: 1px 7px; border-radius: 999px; color: var(--good); background: var(--good-soft); }
 
-  .prompt {
-    margin: 1.2rem 0 0; padding: 1.1rem 1.3rem; background: var(--card);
-    border: 1px solid var(--rule); border-left: 3px solid var(--navy); border-radius: 6px;
-    font-family: var(--serif); font-size: 1.1875rem; line-height: 1.55;
-  }
-  .say { font-size: 0.75rem; color: var(--ink-faint); margin: 0 0 0.3rem; font-family: var(--sans); }
+  .rows { list-style: none; padding: 0; margin: 0; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+  .rows li + li { border-top: 1px solid var(--border); }
+  .qrow { width: 100%; text-align: left; border: 0; background: none; display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; padding: 11px 14px; }
+  .qrow:hover { background: var(--hover); }
+  .qrow .id { font-family: var(--mono); font-size: 11.5px; color: var(--text-3); width: 52px; }
+  .qrow .q { font-weight: 500; }
+  .qrow .side { display: flex; align-items: center; gap: 8px; }
+  .co { font-size: 12px; color: var(--text-3); white-space: nowrap; }
+  .more { display: flex; justify-content: center; margin: 16px 0 0; }
 
-  .timer-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; margin-top: 1.1rem; }
-  .clock { font-variant-numeric: tabular-nums; font-size: 1.6rem; font-family: var(--serif); min-width: 4.5rem; }
-  .clock.over { color: var(--amber); }
+  /* ---------- detail view ---------- */
+  .crumbs { display: flex; align-items: center; gap: 6px; color: var(--text-3); font-size: 13px; padding: 20px 0 0; flex-wrap: wrap; }
+  .crumbs button { border: 0; background: none; padding: 2px 4px; border-radius: 5px; color: var(--text-2); }
+  .crumbs button:hover { background: var(--hover); color: var(--text); }
+  .detail-title { font-size: clamp(22px, 3.6vw, 30px); font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; margin: 10px 0 0; }
+  .props { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .prop { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--text-2); border: 1px solid var(--border); background: var(--surface); border-radius: 7px; padding: 3px 9px; }
+  .prop .k { color: var(--text-3); }
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 20px; margin-top: 20px; align-items: start; }
+  @media (max-width: 880px) { .layout { grid-template-columns: 1fr; } .aside { position: static !important; order: -1; } }
+  .main { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+  .aside { position: sticky; top: 72px; display: flex; flex-direction: column; gap: 12px; }
 
-  .panel { margin-top: 1.6rem; }
-  .panel h3 { font-family: var(--serif); font-weight: 400; font-size: 1.25rem; margin: 0 0 0.6rem; }
-  .panel ul { margin: 0; padding-left: 1.2rem; }
-  .panel li { margin: 0.25rem 0; color: var(--ink-soft); }
-  .panel li b { color: var(--ink); font-weight: 600; }
-  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr)); gap: 0 2rem; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
+  .card-h { display: flex; align-items: center; gap: 8px; padding: 11px 14px; border-bottom: 1px solid var(--border); font-weight: 600; font-size: 13px; }
+  .card-h svg.i { color: var(--text-3); }
+  .card-h .right { margin-left: auto; font-weight: 400; color: var(--text-3); font-size: 12px; }
+  .card-b { padding: 14px; }
+  .card-b ul, .card-b ol { margin: 0; padding-left: 18px; }
+  .card-b li { margin: 4px 0; color: var(--text-2); }
+  .card-b li::marker { color: var(--text-3); }
 
-  .note {
-    background: var(--amber-wash); color: var(--ink); border-radius: 6px; padding: 0.7rem 0.95rem;
-    font-size: 0.875rem; margin-top: 1.2rem;
-  }
-  .note b { color: var(--amber); }
+  .prompt-card { border-left: 3px solid var(--accent); }
+  .prompt-card .say { font-size: 11.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--accent); margin: 0 0 6px; }
+  .prompt-card .text { font-size: 17px; line-height: 1.5; font-weight: 500; letter-spacing: -0.01em; }
+  .src-line { font-size: 12.5px; color: var(--text-3); margin-top: 10px; }
 
-  details { border: 1px solid var(--rule); border-radius: 8px; padding: 0.7rem 1rem; margin-top: 0.8rem; background: var(--card); }
-  details summary { cursor: pointer; font-weight: 600; font-size: 0.9375rem; }
-  details[open] summary { margin-bottom: 0.5rem; }
+  .sheet { overflow-x: auto; }
+  .sheet table { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
+  .sheet th, .sheet td { padding: 7px 12px; text-align: right; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  .sheet th:first-child, .sheet td:first-child { text-align: left; white-space: normal; min-width: 9rem; }
+  .sheet th { background: var(--surface-2); color: var(--text-3); font-weight: 500; font-size: 12px; text-transform: none; position: sticky; top: 0; }
+  .sheet tbody tr:hover td { background: var(--hover); }
+  .sheet tr:last-child td { border-bottom: 0; }
+  .sheet-note { padding: 8px 14px; font-size: 12px; color: var(--text-3); border-top: 1px solid var(--border); }
+  .exhibit + .exhibit { border-top: 1px solid var(--border); }
+  .exhibit-t { padding: 10px 14px 8px; font-size: 13px; font-weight: 600; }
 
+  .callout { display: flex; gap: 10px; padding: 12px 14px; border-radius: var(--radius); font-size: 13px; color: var(--text-2); background: var(--warn-soft); border: 1px solid color-mix(in srgb, var(--warn) 25%, transparent); }
+  .callout svg.i { color: var(--warn); margin-top: 2px; }
+  .callout b { color: var(--text); }
+  .insight { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 30%, transparent); }
+  .insight svg.i { color: var(--accent); }
+
+  .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
   .framework { counter-reset: s; list-style: none; padding: 0 !important; }
-  .framework li { counter-increment: s; position: relative; padding-left: 2rem !important; }
-  .framework li::before {
-    content: counter(s); position: absolute; left: 0; top: 0.1rem; width: 1.4rem; height: 1.4rem;
-    border-radius: 50%; background: var(--navy-wash); color: var(--navy); font-size: 0.75rem;
-    display: grid; place-items: center; font-weight: 600;
-  }
+  .framework li { counter-increment: s; position: relative; padding-left: 28px; margin: 7px 0 !important; }
+  .framework li::before { content: counter(s); position: absolute; left: 0; top: 1px; width: 19px; height: 19px; border-radius: 6px; background: var(--accent-soft); color: var(--accent); font-size: 11px; font-weight: 600; display: grid; place-items: center; }
+  details.card > summary { list-style: none; cursor: pointer; }
+  details.card > summary::-webkit-details-marker { display: none; }
+  details.card[open] > summary .chev { transform: rotate(90deg); }
+  .chev { transition: transform .15s; margin-left: auto; }
+
+  /* session panel */
+  .clock { font-family: var(--mono); font-size: 34px; font-weight: 500; letter-spacing: -0.02em; line-height: 1; }
+  .clock.over { color: var(--warn); }
+  .bar { height: 6px; background: var(--hover); border-radius: 999px; overflow: hidden; margin: 12px 0; }
+  .bar > i { display: block; height: 100%; width: 0; background: var(--accent); border-radius: inherit; transition: width .4s; }
+  .bar.over > i { background: var(--warn); }
+  .muted { color: var(--text-3); font-size: 12.5px; }
+  .btn-row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .role-pill { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; font-size: 13px; }
+  .copied { color: var(--good); font-size: 12px; }
 
   /* rubric */
-  .rubric { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
-  .rubric td { padding: 0.55rem 0; border-bottom: 1px solid var(--rule-soft); vertical-align: top; }
-  .rubric td:first-child { padding-right: 1rem; }
-  .rubric .d { font-weight: 600; }
-  .rubric .h { color: var(--ink-faint); font-size: 0.8125rem; }
-  .score { display: flex; gap: 0.25rem; }
-  .score button {
-    width: 2rem; height: 2rem; border-radius: 6px; border: 1px solid var(--rule); background: transparent; cursor: pointer; font-size: 0.8125rem;
+  .rubric-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .rubric-row:first-child { padding-top: 0; } .rubric-row:last-of-type { border-bottom: 0; }
+  .rubric-row .d { font-weight: 600; font-size: 13px; }
+  .rubric-row .h { color: var(--text-3); font-size: 12.5px; }
+  .seg { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: var(--surface-2); }
+  .seg button { border: 0; background: none; width: 34px; height: 30px; font-weight: 500; color: var(--text-2); }
+  .seg button + button { border-left: 1px solid var(--border); }
+  .seg button:hover { background: var(--hover); }
+  .seg button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); }
+  .scorebar { display: flex; align-items: center; gap: 12px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+  .scorebar .bar { flex: 1; margin: 0; }
+  .scorebar .total { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .verdict { font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--hover); color: var(--text-2); }
+  .verdict.good { background: var(--good-soft); color: var(--good); }
+  .verdict.warn { background: var(--warn-soft); color: var(--warn); }
+
+  textarea { width: 100%; min-height: 150px; resize: vertical; border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; background: var(--surface-2); line-height: 1.5; font-size: 13.5px; }
+  textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+
+  /* role chooser */
+  .chooser { margin-top: 24px; }
+  .chooser h3 { font-size: 15px; font-weight: 600; margin: 0 0 4px; }
+  .chooser p.muted { margin: 0 0 14px; font-size: 13px; }
+  .roles { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+  .role { text-align: left; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 10px; transition: border-color .12s, box-shadow .12s; }
+  .role:hover { border-color: var(--accent); box-shadow: var(--shadow-lg); }
+  .role .ic { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); }
+  .role .ic svg.i { width: 20px; height: 20px; }
+  .role strong { font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
+  .role ul { margin: 0; padding-left: 18px; color: var(--text-2); font-size: 13px; }
+  .role .cta { margin-top: auto; color: var(--accent); font-weight: 600; font-size: 13px; display: inline-flex; align-items: center; gap: 4px; }
+
+  /* footer */
+  footer { margin: 56px 0 40px; padding-top: 20px; border-top: 1px solid var(--border); color: var(--text-3); font-size: 12.5px; }
+  footer details summary { cursor: pointer; color: var(--text-2); font-weight: 500; }
+  footer ul { columns: 2 18rem; padding-left: 18px; margin: 10px 0 0; }
+  footer li { margin: 3px 0; break-inside: avoid; }
+
+  @media (max-width: 640px) {
+    .topbar .wrap { gap: 8px; }
+    .brand .name { display: none; }
+    .nav { margin-left: 0; }
+    .nav button { padding: 5px 9px; }
+    .progress-chip .txt { display: none; }
+    .hero { padding-top: 24px; }
+    .grid { grid-template-columns: 1fr; }
+    .qrow { grid-template-columns: 1fr; gap: 6px; }
+    .qrow .id { width: auto; }
+    .seg button { width: 30px; }
   }
-  .score button[aria-pressed="true"] { background: var(--navy); color: var(--paper); border-color: var(--navy); }
-  .total { margin-top: 0.8rem; font-size: 0.9375rem; }
-  .total b { font-family: var(--serif); font-size: 1.25rem; font-weight: 400; }
-
-  textarea {
-    width: 100%; min-height: 8rem; resize: vertical; border: 1px solid var(--rule); border-radius: 8px;
-    padding: 0.7rem 0.85rem; background: var(--card); line-height: 1.5; font-size: 0.9375rem;
-  }
-
-  .share { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin-top: 1rem; font-size: 0.8125rem; color: var(--ink-faint); }
-
-  .sources { margin-top: 3rem; font-size: 0.8125rem; color: var(--ink-faint); }
-  .sources ul { padding-left: 1.1rem; }
-
-  @media (max-width: 480px) {
-    .list button { grid-template-columns: 1fr; }
-    .score button { width: 1.85rem; height: 1.85rem; }
-  }
-
-  /* ---------- v2: tabs, filters, briefs, exhibits, bank ---------- */
-  .tabs { display: flex; gap: 0; border-bottom: 1px solid var(--rule); margin-top: 2rem; }
-  .tab {
-    background: none; border: 0; border-bottom: 2px solid transparent; padding: 0.55rem 1rem 0.6rem;
-    cursor: pointer; font-size: 0.9375rem; color: var(--ink-soft); margin-bottom: -1px;
-  }
-  .tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); font-weight: 600; }
-  .tab .count { font-size: 0.75rem; color: var(--ink-faint); font-weight: 400; margin-left: 0.3rem; }
-  .filters { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin-top: 0.9rem; width: 100%; }
-  .filters input[type="search"], .filters select {
-    border: 1px solid var(--rule); background: var(--card); border-radius: 8px; padding: 0.4rem 0.7rem; font-size: 0.875rem;
-  }
-  .filters input[type="search"] { flex: 1 1 14rem; min-width: 0; }
-  .result-count { font-size: 0.8125rem; color: var(--ink-faint); margin: 0.9rem 0 0; }
-  .lvl { font-size: 0.6875rem; padding: 0.05rem 0.45rem; border-radius: 999px; border: 1px solid var(--rule); color: var(--ink-soft); margin-left: 0.4rem; vertical-align: 2px; font-family: var(--sans); }
-  .list .q { font-family: var(--serif); font-size: 1.0625rem; }
-  .list .data-flag { color: var(--navy); font-size: 0.75rem; margin-left: 0.4rem; font-family: var(--sans); }
-  .more { margin: 1rem 0 0; }
-
-  .brief { margin-top: 1.4rem; }
-  .brief ul { margin: 0; padding-left: 1.2rem; }
-  .brief li { margin: 0.3rem 0; }
-  .exhibit { margin-top: 1.1rem; border: 1px solid var(--rule); border-radius: 8px; background: var(--card); overflow: hidden; }
-  .exhibit h4 { margin: 0; padding: 0.6rem 0.9rem; font-size: 0.875rem; font-weight: 600; border-bottom: 1px solid var(--rule-soft); background: var(--navy-wash); }
-  .exhibit .scroll { overflow-x: auto; }
-  .exhibit table { width: 100%; border-collapse: collapse; font-size: 0.875rem; font-variant-numeric: tabular-nums; }
-  .exhibit th, .exhibit td { padding: 0.45rem 0.9rem; text-align: right; border-bottom: 1px solid var(--rule-soft); white-space: nowrap; }
-  .exhibit th:first-child, .exhibit td:first-child { text-align: left; white-space: normal; min-width: 8rem; }
-  .exhibit th { font-weight: 600; color: var(--ink-soft); font-size: 0.8125rem; }
-  .exhibit tr:last-child td { border-bottom: 0; }
-  .exhibit .src-note { padding: 0.45rem 0.9rem; font-size: 0.75rem; color: var(--ink-faint); border-top: 1px solid var(--rule-soft); }
-  .insight { margin-top: 1.2rem; padding: 0.85rem 1rem; border-radius: 8px; background: var(--navy-wash); }
-  .insight b { color: var(--navy); }
-  .src-line { font-size: 0.8125rem; color: var(--ink-faint); margin-top: 0.6rem; }
 </style>
 </head>
 <body>
-<main>
-  <h1>PM Case Practice</h1>
-  <p class="lede">Grab a friend, pick a case, and choose a side of the table. One of you interviews, the other answers — then swap.</p>
+<header class="topbar">
+  <div class="wrap">
+    <button class="brand" id="home" aria-label="PM Case Practice home"><span class="logo">PM</span><span class="name">Case Practice</span></button>
+    <nav class="nav" role="tablist" aria-label="Library">
+      <button role="tab" data-tab="cases" aria-selected="true">Cases <span class="count" id="n-cases"></span></button>
+      <button role="tab" data-tab="bank" aria-selected="false">Question bank <span class="count" id="n-bank"></span></button>
+    </nav>
+    <span class="spacer"></span>
+    <span class="progress-chip" id="progress"></span>
+  </div>
+</header>
 
-  <hr class="rule">
-
-  <div id="picker">
-    <p class="label">1 · Pick a case</p>
-    <div class="tabs" role="tablist" style="margin-top:0">
-      <button class="tab" role="tab" data-tab="cases" aria-selected="true">Full cases with data<span class="count" id="n-cases"></span></button>
-      <button class="tab" role="tab" data-tab="bank" aria-selected="false">Question bank<span class="count" id="n-bank"></span></button>
-    </div>
-    <div class="toolbar" style="margin-top:1rem">
-      <div class="chips" id="cats" role="group" aria-label="Category"></div>
-      <div class="filters">
-        <input type="search" id="search" placeholder="Search questions, companies, industries…" aria-label="Search">
-        <select id="lvl" aria-label="Difficulty"><option value="">Any difficulty</option><option>Easy</option><option>Medium</option><option>Hard</option></select>
-        <select id="co" aria-label="Company" hidden></select>
-        <button class="btn" id="random">Random</button>
+<main class="wrap">
+  <section id="picker">
+    <div class="hero" id="hero">
+      <span class="eyebrow"><svg class="i" viewBox="0 0 24 24"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.3L12 16.7l-6.2 4.5 2.4-7.3L2 9.4h7.6z"/></svg> PM interview prep workspace</span>
+      <h1>Run product cases like a real interview loop.</h1>
+      <p class="sub">Pick a case, choose your side of the table, and practise with a friend: one interviews with the answer guide and rubric, the other works the problem from the brief and data.</p>
+      <div class="steps">
+        <div class="step"><span class="n">01</span><div><b>Pick a case</b><span>Filter by category, difficulty or company.</span></div></div>
+        <div class="step"><span class="n">02</span><div><b>Choose a side</b><span>Interviewer or candidate — then send your partner the link.</span></div></div>
+        <div class="step"><span class="n">03</span><div><b>Run, score, debrief</b><span>Timebox it, score the rubric, review the key insight.</span></div></div>
       </div>
+      <div class="kpis" id="kpis"></div>
     </div>
-    <p class="result-count" id="rcount"></p>
-    <ul class="list" id="list"></ul>
-    <div class="more"><button class="btn ghost" id="more" hidden>Show more</button></div>
-  </div>
 
-  <section class="case" id="case" hidden aria-live="polite"></section>
+    <div class="section-h"><h2 id="list-title">Cases</h2><span class="muted" id="rcount"></span></div>
+    <div class="filterbar">
+      <label class="search"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input type="search" id="search" placeholder="Search cases, companies, industries…" aria-label="Search"></label>
+      <select class="select" id="lvl" aria-label="Difficulty"><option value="">Any difficulty</option><option>Easy</option><option>Medium</option><option>Hard</option></select>
+      <select class="select" id="co" aria-label="Company" hidden></select>
+      <button class="btn" id="random"><svg class="i" viewBox="0 0 24 24"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>Shuffle</button>
+    </div>
+    <div class="labels" id="cats" role="group" aria-label="Category"></div>
+    <p class="result-count" id="count-line" hidden></p>
+    <ul class="grid" id="list"></ul>
+    <div class="more"><button class="btn" id="more" hidden>Show more</button></div>
+  </section>
 
-  <div class="sources">
-    <p class="label">Where these come from</p>
-    <p>Full cases use fictional or clearly illustrative data built around question types widely reported from PM loops. Bank questions are paraphrased from the public sources below, tagged by the company they were reported at. Rubrics adapt publicly described evaluation criteria — no company's internal rubric is reproduced.</p>
-    <ul id="sources"></ul>
-  </div>
+  <section id="case" hidden aria-live="polite"></section>
+
+  <footer>
+    <p>Full cases use fictional or clearly illustrative data built around question types widely reported from PM loops. Bank questions are paraphrased from public sources and tagged by the company they were reported at. Rubrics adapt publicly described evaluation criteria — no company's internal rubric is reproduced.</p>
+    <details><summary>Sources (<span id="n-sources"></span>)</summary><ul id="sources"></ul></details>
+  </footer>
 </main>
 
 <script src="pm/cases-core.js"></script>
@@ -335,15 +408,62 @@ const store = {
   get(k, d) { try { const v = localStorage.getItem('pm.' + k); return v == null ? d : JSON.parse(v); } catch (_) { return d; } },
   set(k, v) { try { localStorage.setItem('pm.' + k, JSON.stringify(v)); } catch (_) {} }
 };
-const PAGE = 40;
+const PAGE = 30;
 let role = null, tab = 'cases', cat = 'all', shown = PAGE;
 let current = null; // { kind: 'case' | 'bank', item }
 let timer = { start: null, elapsed: 0, id: null };
 const done = new Set(store.get('done', []));
 
+// Ticket-style keys shown in the UI (PM-001, Q-001); links still use the stable ids.
+const pad = (n) => String(n).padStart(3, '0');
+CASES.forEach((c, i) => { c.key = 'PM-' + pad(i + 1); });
+BANK.forEach((q, i) => { q.key = 'Q-' + pad(i + 1); });
+
 const $ = (s, el = document) => el.querySelector(s);
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const li = (arr) => (arr || []).map((x) => '<li>' + esc(x) + '</li>').join('');
+
+/* ---------- small UI pieces ---------- */
+const ICONS = {
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  table: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/>',
+  doc: '<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h6"/>',
+  chat: '<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/>',
+  check: '<path d="M5 12.5l4.5 4.5L19 7"/>',
+  alert: '<path d="M12 3l9.5 17h-19z"/><path d="M12 10v4M12 17.5v.01"/>',
+  bulb: '<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.3 1 2.1h5c0-.8.4-1.6 1-2.1A6 6 0 0 0 12 3z"/>',
+  list: '<path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/>',
+  star: '<path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6-5.3-3-5.3 3 1.2-6L3.4 9.3l6-.7z"/>',
+  pen: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M14 6l4 4"/>',
+  link: '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
+  mic: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>',
+  brain: '<path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-2 5 3 3 0 0 0 2 5 3 3 0 0 0 6 1V5a3 3 0 0 0-3-1zM15 4a3 3 0 0 1 3 3 3 3 0 0 1 2 5 3 3 0 0 1-2 5 3 3 0 0 1-6 1"/>',
+  swap: '<path d="M7 4L3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7"/>',
+  arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+  chev: '<path d="M9 6l6 6-6 6"/>',
+  flag: '<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>'
+};
+const icon = (n, cls = '') => '<svg class="i ' + cls + '" viewBox="0 0 24 24" aria-hidden="true">' + ICONS[n] + '</svg>';
+const LVL = { Easy: 1, Medium: 2, Hard: 3 };
+const prio = (lvl) => lvl ? '<span class="prio-wrap" title="Difficulty: ' + esc(lvl) + '"><span class="prio l' + (LVL[lvl] || 0) + '"><i></i><i></i><i></i></span>' + esc(lvl) + '</span>' : '';
+const catTag = (c) => '<span class="cat-tag" data-cat="' + c + '"><span class="dot"></span>' + esc(CATS[c].name) + '</span>';
+const card = (ic, title, body, right) => '<div class="card"><div class="card-h">' + icon(ic) + esc(title) + (right ? '<span class="right">' + right + '</span>' : '') + '</div><div class="card-b">' + body + '</div></div>';
+
+/* ---------- header stats ---------- */
+function renderProgress() {
+  const total = CASES.length + BANK.length;
+  const n = [...done].filter((id) => CASES.some((c) => c.id === id) || BANK.some((q) => q.id === id)).length;
+  const pct = total ? n / total : 0;
+  const r = 7, len = 2 * Math.PI * r;
+  $('#progress').innerHTML = '<svg class="ring" viewBox="0 0 18 18"><circle cx="9" cy="9" r="' + r + '" fill="none" stroke="var(--border-2)" stroke-width="2.5"/>' +
+    '<circle cx="9" cy="9" r="' + r + '" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="' + (len * pct) + ' ' + len + '" transform="rotate(-90 9 9)"/></svg>' +
+    '<span><b>' + n + '</b><span class="txt"> practised</span></span>';
+}
+function renderKpis() {
+  const withData = CASES.filter((c) => c.exhibits && c.exhibits.length).length;
+  const k = [[CASES.length, 'Full cases'], [withData, 'With data exhibits'], [BANK.length, 'Bank questions'], [Object.keys(CATS).length, 'Categories']];
+  $('#kpis').innerHTML = k.map(([v, l]) => '<div class="kpi"><div class="v">' + v + '</div><div class="l">' + l + '</div></div>').join('');
+}
 
 /* ---------- role ---------- */
 // The side is chosen per case, after the case is picked.
@@ -353,34 +473,39 @@ function setRole(r) {
   syncHash();
 }
 function roleChooser() {
-  return '<p class="label" style="margin-top:1.6rem">2 · Choose your side</p>' +
-    '<div class="roles" role="group" aria-label="Role">' +
-      '<button class="role" data-role="interviewer"><strong>I\'m the interviewer</strong>' +
-      '<span>See the full case packet plus the answer guide: follow-ups to probe with, what a strong answer covers, the key insight, and a scoring rubric.</span></button>' +
-      '<button class="role" data-role="candidate"><strong>I\'m being interviewed</strong>' +
-      '<span>See the case packet — prompt, context and data — with a timer and scratchpad. The answer guide unlocks when you finish.</span></button>' +
-    '</div>';
+  return '<div class="chooser"><h3>Choose your side of the table</h3><p class="muted">Each of you opens this case and picks a side. You can switch later.</p><div class="roles" role="group" aria-label="Role">' +
+    '<button class="role" data-role="interviewer"><span class="ic">' + icon('mic') + '</span><strong>I\'m the interviewer</strong>' +
+      '<ul><li>Full case packet: brief and data</li><li>Follow-ups to probe with</li><li>Strong-answer checklist and key insight</li><li>Scoring rubric and feedback notes</li></ul>' +
+      '<span class="cta">Run the interview ' + icon('arrow') + '</span></button>' +
+    '<button class="role" data-role="candidate"><span class="ic">' + icon('brain') + '</span><strong>I\'m being interviewed</strong>' +
+      '<ul><li>Case packet: prompt, brief and data</li><li>Timer and scratchpad</li><li>Optional framework hint</li><li>Debrief unlocks when you finish</li></ul>' +
+      '<span class="cta">Take the case ' + icon('arrow') + '</span></button>' +
+  '</div></div>';
 }
 function pickNew(kind, id) { role = null; openItem(kind, id); }
 
 /* ---------- tabs + filters ---------- */
 $('#n-cases').textContent = CASES.length;
 $('#n-bank').textContent = BANK.length;
-document.querySelectorAll('.tab').forEach((t) => t.addEventListener('click', () => setTab(t.dataset.tab)));
+document.querySelectorAll('.nav button').forEach((t) => t.addEventListener('click', () => setTab(t.dataset.tab)));
+$('#home').addEventListener('click', () => { role = null; setTab('cases'); window.scrollTo({ top: 0, behavior: 'smooth' }); });
 function setTab(t) {
   tab = t; shown = PAGE;
-  document.querySelectorAll('.tab').forEach((x) => x.setAttribute('aria-selected', String(x.dataset.tab === t)));
+  document.querySelectorAll('.nav button').forEach((x) => x.setAttribute('aria-selected', String(x.dataset.tab === t)));
   $('#co').hidden = t !== 'bank';
+  $('#list-title').textContent = t === 'cases' ? 'Cases' : 'Question bank';
+  $('#search').placeholder = t === 'cases' ? 'Search cases, companies, industries…' : 'Search questions, companies, sources…';
   closeItem(); renderCats(); renderList();
 }
 function pool() { return tab === 'cases' ? CASES : BANK; }
 function renderCats() {
   const counts = {};
   pool().forEach((x) => { counts[x.cat] = (counts[x.cat] || 0) + 1; });
-  const all = [['all', 'All', pool().length]].concat(Object.keys(CATS).filter((k) => counts[k]).map((k) => [k, CATS[k].name, counts[k]]));
   if (cat !== 'all' && !counts[cat]) cat = 'all';
-  $('#cats').innerHTML = all.map(([k, n, c]) => '<button class="chip" data-cat="' + k + '" aria-pressed="' + (k === cat) + '">' + esc(n) + ' <span style="opacity:.6">' + c + '</span></button>').join('');
-  $('#cats').querySelectorAll('.chip').forEach((c) => c.addEventListener('click', () => { cat = c.dataset.cat; shown = PAGE; renderCats(); renderList(); }));
+  const chips = [['all', 'All', pool().length]].concat(Object.keys(CATS).filter((k) => counts[k]).map((k) => [k, CATS[k].name, counts[k]]));
+  $('#cats').innerHTML = chips.map(([k, n, c]) => '<button class="label-chip" data-cat="' + k + '" aria-pressed="' + (k === cat) + '">' +
+    (k === 'all' ? '' : '<span class="dot"></span>') + esc(n) + '<span class="c">' + c + '</span></button>').join('');
+  $('#cats').querySelectorAll('.label-chip').forEach((c) => c.addEventListener('click', () => { cat = c.dataset.cat; shown = PAGE; renderCats(); renderList(); }));
 }
 function renderCompanies() {
   const cos = [...new Set(BANK.map((q) => q.co).filter(Boolean))].sort((a, b) => a === 'General' ? 1 : b === 'General' ? -1 : a.localeCompare(b));
@@ -398,29 +523,35 @@ function filtered() {
     if (tab === 'bank' && co && x.co !== co) return false;
     if (!term) return true;
     const hay = (tab === 'cases'
-      ? [x.title, x.prompt, x.style, (x.brief || []).join(' ')]
-      : [x.q, x.co, (SOURCES[x.src] || {}).name]).join(' ').toLowerCase();
+      ? [x.key, x.title, x.prompt, x.style, (x.brief || []).join(' ')]
+      : [x.key, x.q, x.co, (SOURCES[x.src] || {}).name]).join(' ').toLowerCase();
     return hay.includes(term);
   });
 }
 function renderList() {
-  $('#list').hidden = false; $('#rcount').hidden = false;
+  $('#picker').hidden = false;
   const items = filtered();
-  $('#rcount').textContent = items.length + (tab === 'cases' ? ' case' : ' question') + (items.length === 1 ? '' : 's');
-  $('#list').innerHTML = items.slice(0, shown).map((x) => {
-    const isDone = done.has(x.id) ? ' done' : '';
-    const lvl = x.lvl ? '<span class="lvl">' + esc(x.lvl) + '</span>' : '';
+  $('#rcount').textContent = items.length + ' ' + (tab === 'cases' ? 'case' : 'question') + (items.length === 1 ? '' : 's');
+  const list = $('#list');
+  list.className = tab === 'cases' ? 'grid' : 'rows';
+  const status = (x) => done.has(x.id) ? '<span class="status">' + icon('check') + 'Done</span>' : '';
+  list.innerHTML = items.slice(0, shown).map((x) => {
     if (tab === 'cases') {
-      const data = x.exhibits && x.exhibits.length ? '<span class="data-flag">▦ data</span>' : '';
-      return '<li><button data-id="' + esc(x.id) + '"><span class="t' + isDone + '">' + esc(x.title) + lvl + data + '</span>' +
-        '<span class="m">' + esc(CATS[x.cat].name) + ' · ' + esc(x.style) + ' · ' + (x.min || 20) + ' min</span></button></li>';
+      const hasData = x.exhibits && x.exhibits.length;
+      return '<li><button class="ticket" data-id="' + esc(x.id) + '">' +
+        '<span class="row"><span class="id">' + x.key + '</span>' + catTag(x.cat) + status(x) + '</span>' +
+        '<span class="title">' + esc(x.title) + '</span>' +
+        '<span class="meta">' + prio(x.lvl) + '<span>' + icon('clock') + (x.min || 20) + ' min</span>' +
+        (hasData ? '<span>' + icon('table') + x.exhibits.length + ' exhibit' + (x.exhibits.length > 1 ? 's' : '') + '</span>' : '') +
+        '<span>' + esc(x.style) + '</span></span></button></li>';
     }
-    return '<li><button data-id="' + esc(x.id) + '"><span class="q' + isDone + '">' + esc(x.q) + lvl + '</span>' +
-      '<span class="m">' + esc(CATS[x.cat].name) + ' · ' + esc(x.co || 'General') + '</span></button></li>';
+    return '<li><button class="qrow" data-id="' + esc(x.id) + '"><span class="id">' + x.key + '</span>' +
+      '<span class="q">' + esc(x.q) + '</span>' +
+      '<span class="side">' + status(x) + catTag(x.cat) + '<span class="co">' + esc(x.co || 'General') + '</span></span></button></li>';
   }).join('');
-  $('#list').querySelectorAll('button').forEach((b) => b.addEventListener('click', () => pickNew(tab === 'cases' ? 'case' : 'bank', b.dataset.id)));
+  list.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => pickNew(tab === 'cases' ? 'case' : 'bank', b.dataset.id)));
   $('#more').hidden = items.length <= shown;
-  $('#more').textContent = 'Show more (' + (items.length - shown) + ' left)';
+  $('#more').textContent = 'Show more · ' + (items.length - shown) + ' left';
 }
 $('#more').addEventListener('click', () => { shown += PAGE * 2; renderList(); });
 $('#random').addEventListener('click', () => {
@@ -431,102 +562,120 @@ $('#random').addEventListener('click', () => {
   pickNew(tab === 'cases' ? 'case' : 'bank', from[Math.floor(Math.random() * from.length)].id);
 });
 
-/* ---------- item view ---------- */
+/* ---------- detail view ---------- */
 function exhibitHtml(e) {
-  return '<div class="exhibit"><h4>' + esc(e.title) + '</h4><div class="scroll"><table><thead><tr>' +
+  return '<div class="exhibit"><div class="exhibit-t">' + esc(e.title) + '</div><div class="sheet"><table><thead><tr>' +
     (e.cols || []).map((c) => '<th>' + esc(c) + '</th>').join('') + '</tr></thead><tbody>' +
     (e.rows || []).map((r) => '<tr>' + r.map((v) => '<td>' + esc(v) + '</td>').join('') + '</tr>').join('') +
-    '</tbody></table></div>' + (e.note ? '<div class="src-note">' + esc(e.note) + '</div>' : '') + '</div>';
+    '</tbody></table></div>' + (e.note ? '<div class="sheet-note">' + esc(e.note) + '</div>' : '') + '</div>';
 }
 
-function closeItem() { current = null; stopTimer(true); $('#case').hidden = true; $('#case').innerHTML = ''; syncHash(); }
-function backToList() { role = null; closeItem(); renderList(); window.scrollTo({ top: $('#picker').offsetTop - 20, behavior: 'smooth' }); }
+function closeItem() { current = null; stopTimer(true); $('#case').hidden = true; $('#case').innerHTML = ''; $('#picker').hidden = false; syncHash(); }
+function backToList() { role = null; closeItem(); renderList(); window.scrollTo({ top: $('#list-title').offsetTop - 80, behavior: 'smooth' }); }
 
 function openItem(kind, id, resetTimer = true) {
   const list = kind === 'case' ? CASES : BANK;
   const x = list.find((c) => c.id === id);
   if (!x) return;
-  if (kind !== (tab === 'cases' ? 'case' : 'bank')) { tab = kind === 'case' ? 'cases' : 'bank'; document.querySelectorAll('.tab').forEach((t) => t.setAttribute('aria-selected', String(t.dataset.tab === tab))); $('#co').hidden = tab !== 'bank'; renderCats(); }
+  if (kind !== (tab === 'cases' ? 'case' : 'bank')) {
+    tab = kind === 'case' ? 'cases' : 'bank';
+    document.querySelectorAll('.nav button').forEach((t) => t.setAttribute('aria-selected', String(t.dataset.tab === tab)));
+    $('#co').hidden = tab !== 'bank';
+    renderCats();
+  }
   current = { kind, item: x };
   if (resetTimer) stopTimer(true);
   const k = CATS[x.cat];
   const iv = role === 'interviewer';
   const min = x.min || ({ estimate: 15, behavioral: 10 })[x.cat] || 25;
+  current.min = min;
   const title = kind === 'case' ? x.title : x.q;
-  const src = kind === 'bank' && SOURCES[x.src] ? '<p class="src-line">Reported at ' + esc(x.co || 'various companies') + ' · source: <a href="' + esc(SOURCES[x.src].url) + '" rel="noopener" target="_blank">' + esc(SOURCES[x.src].name) + '</a></p>' : '';
 
   let html =
-    '<button class="btn ghost" id="backlist">← All ' + (kind === 'case' ? 'cases' : 'questions') + '</button>' +
-    '<div class="case-head" style="margin-top:1.2rem"><span class="tag">' + esc(k.name.toUpperCase()) + '</span>' +
-    (x.style ? '<span class="tag">' + esc(x.style) + '</span>' : '') + (x.co ? '<span class="tag">' + esc(x.co) + '</span>' : '') +
-    (x.lvl ? '<span class="tag">' + esc(x.lvl) + '</span>' : '') + '<span class="tag">' + min + ' min</span></div>' +
-    '<h2>' + esc(title) + '</h2>';
+    '<nav class="crumbs"><button id="backlist">' + (kind === 'case' ? 'Cases' : 'Question bank') + '</button>' + icon('chev') +
+    '<span>' + esc(k.name) + '</span>' + icon('chev') + '<span class="mono">' + x.key + '</span></nav>' +
+    '<h1 class="detail-title">' + esc(title) + '</h1>' +
+    '<div class="props">' +
+      '<span class="prop" data-cat="' + x.cat + '"><span class="dot"></span>' + esc(k.name) + '</span>' +
+      (x.lvl ? '<span class="prop">' + prio(x.lvl) + '</span>' : '') +
+      '<span class="prop">' + icon('clock') + min + ' min</span>' +
+      (x.style ? '<span class="prop"><span class="k">Style</span>' + esc(x.style) + '</span>' : '') +
+      (x.co ? '<span class="prop"><span class="k">Reported at</span>' + esc(x.co) + '</span>' : '') +
+      (kind === 'case' && x.exhibits && x.exhibits.length ? '<span class="prop">' + icon('table') + x.exhibits.length + ' exhibit' + (x.exhibits.length > 1 ? 's' : '') + '</span>' : '') +
+    '</div>';
+
+  const el = $('#case');
+  $('#picker').hidden = true;
+  el.hidden = false;
 
   if (!role) {
-    const el = $('#case');
     el.innerHTML = html + roleChooser();
-    el.hidden = false;
-    $('#list').hidden = true; $('#more').hidden = true; $('#rcount').hidden = true;
     $('#backlist').addEventListener('click', backToList);
     el.querySelectorAll('.role').forEach((b) => b.addEventListener('click', () => setRole(b.dataset.role)));
     syncHash();
-    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    window.scrollTo({ top: 0 });
     return;
   }
 
-  html +=
-    '<p class="share" style="margin-top:.6rem">You\'re ' + (iv ? 'the interviewer' : 'being interviewed') +
-    ' · <button class="btn ghost" id="switchside">Switch side</button></p>' +
-    '<div class="prompt"><p class="say">' + (iv ? 'Read this aloud' : 'Your interviewer asks') + '</p>' + esc(kind === 'case' ? x.prompt : x.q) + '</div>' + src;
-
-  // case packet — shared with both people
-  if (kind === 'case') {
-    if (x.brief && x.brief.length) html += '<div class="brief panel"><h3>Case brief</h3><ul>' + li(x.brief) + '</ul></div>';
-    if (x.exhibits && x.exhibits.length) html += '<div class="panel"><h3>Data</h3>' + x.exhibits.map(exhibitHtml).join('') + '</div>';
+  // ---- main column: the case packet (shared) + role-specific tools ----
+  const src = kind === 'bank' && SOURCES[x.src] ? '<p class="src-line">Source: <a href="' + esc(SOURCES[x.src].url) + '" rel="noopener" target="_blank">' + esc(SOURCES[x.src].name) + '</a></p>' : '';
+  let main =
+    '<div class="card prompt-card"><div class="card-b"><p class="say">' + (iv ? 'Read this aloud' : 'Your interviewer asks') + '</p>' +
+    '<div class="text">' + esc(kind === 'case' ? x.prompt : x.q) + '</div>' + src + '</div></div>';
+  if (kind === 'case' && x.brief && x.brief.length) main += card('doc', 'Case brief', '<ul>' + li(x.brief) + '</ul>');
+  if (kind === 'case' && x.exhibits && x.exhibits.length) {
+    main += '<div class="card"><div class="card-h">' + icon('table') + 'Data<span class="right">' + x.exhibits.length + ' exhibit' + (x.exhibits.length > 1 ? 's' : '') + '</span></div>' + x.exhibits.map(exhibitHtml).join('') + '</div>';
   }
-
-  html += '<div class="timer-row"><span class="clock" id="clock">0:00</span>' +
-    '<button class="btn" id="tstart">Start</button><button class="btn ghost" id="treset">Reset</button>' +
-    '<span class="tag">Target ' + min + ' min</span></div>' +
-    '<div class="share"><span>Send your partner this ' + (kind === 'case' ? 'case' : 'question') + ':</span>' +
-    '<button class="btn ghost" data-link="' + (iv ? 'candidate' : 'interviewer') + '">Copy link for the ' + (iv ? 'candidate' : 'interviewer') + '</button>' +
-    '<span id="copied" class="tag"></span></div>';
 
   const follow = kind === 'case' ? x.follow : k.probes;
   const guide =
-    (x.insight ? '<div class="insight"><b>Key insight.</b> ' + esc(x.insight) + '</div>' : '') +
-    '<div class="grid2">' +
-      '<div class="panel"><h3>Follow-ups to probe</h3><ul>' + li(follow) + '</ul></div>' +
-      (x.strong ? '<div class="panel"><h3>A strong answer covers</h3><ul>' + li(x.strong) + '</ul></div>' : '<div class="panel"><h3>Expected structure</h3><ol class="framework">' + li(k.framework) + '</ol></div>') +
-      (x.traps ? '<div class="panel"><h3>Watch for</h3><ul>' + li(x.traps) + '</ul></div>' : '') +
-    '</div>';
+    (x.insight ? '<div class="callout insight">' + icon('bulb') + '<div><b>Key insight.</b> ' + esc(x.insight) + '</div></div>' : '') +
+    '<div class="two">' +
+      card('chat', 'Follow-ups to probe', '<ul>' + li(follow) + '</ul>') +
+      (x.strong ? card('check', 'A strong answer covers', '<ul>' + li(x.strong) + '</ul>') : card('list', 'Expected structure', '<ol class="framework">' + li(k.framework) + '</ol>')) +
+    '</div>' +
+    (x.traps ? card('alert', 'Watch for', '<ul>' + li(x.traps) + '</ul>') : '');
+
+  const frameworkCard = (open) => '<details class="card"' + (open ? ' open' : '') + '><summary class="card-h">' + icon('list') + 'Framework · ' + esc(k.name) + icon('chev', 'chev') + '</summary>' +
+    '<div class="card-b"><ol class="framework">' + li(k.framework) + '</ol></div></details>';
 
   if (iv) {
-    html +=
-      '<div class="note"><b>Interviewer tips.</b> The candidate sees the same brief and data. Your job is to push: ask the follow-ups, challenge numbers, and keep time. Leave 5 minutes for feedback.</div>' +
+    main +=
+      '<div class="callout">' + icon('flag') + '<div><b>Interviewer mode.</b> The candidate sees the same prompt, brief and data. Push on their numbers and choices, keep time, and leave 5 minutes for feedback.</div></div>' +
       guide +
-      (x.strong ? '<details><summary>Expected structure (' + esc(k.name) + ')</summary><ol class="framework">' + li(k.framework) + '</ol></details>' : '') +
-      '<div class="panel"><h3>Score it</h3><p class="tag" style="margin:0 0 .4rem">1 = weak · 2 = mixed · 3 = solid · 4 = strong</p>' +
-      '<table class="rubric"><tbody>' + k.rubric.map(([d, h], i) =>
-        '<tr><td><div class="d">' + esc(d) + '</div><div class="h">' + esc(h) + '</div></td>' +
-        '<td><div class="score" data-row="' + i + '">' + [1, 2, 3, 4].map((n) => '<button aria-pressed="false" aria-label="' + esc(d) + ' ' + n + '">' + n + '</button>').join('') + '</div></td></tr>').join('') +
-      '</tbody></table><p class="total" id="total">Total: <b>—</b></p></div>' +
-      '<div class="panel"><h3>Feedback notes</h3><textarea id="notes" placeholder="What they did well, what to work on, best moment, biggest miss…"></textarea></div>';
+      '<div class="card"><div class="card-h">' + icon('star') + 'Scorecard<span class="right">1 weak · 2 mixed · 3 solid · 4 strong</span></div><div class="card-b">' +
+        k.rubric.map(([d, h], i) =>
+          '<div class="rubric-row"><div><div class="d">' + esc(d) + '</div><div class="h">' + esc(h) + '</div></div>' +
+          '<div class="seg" data-row="' + i + '" role="group" aria-label="' + esc(d) + '">' + [1, 2, 3, 4].map((n) => '<button aria-pressed="false" aria-label="' + esc(d) + ' ' + n + '">' + n + '</button>').join('') + '</div></div>').join('') +
+        '<div class="scorebar"><span class="total" id="total">— / ' + k.rubric.length * 4 + '</span><div class="bar" id="scorebar"><i></i></div><span class="verdict" id="verdict">Not scored</span></div>' +
+      '</div></div>' +
+      card('pen', 'Feedback notes', '<textarea id="notes" placeholder="What they did well, what to work on, best moment, biggest miss…"></textarea>');
   } else {
-    html +=
-      '<div class="note"><b>Before you start.</b> Read the brief' + (kind === 'case' && x.exhibits && x.exhibits.length ? ' and the data' : '') + ', take a minute to structure, then think out loud. Expect follow-ups that push on your numbers and choices.</div>' +
-      '<details><summary>Framework hint — ' + esc(k.name) + '</summary><ol class="framework">' + li(k.framework) + '</ol></details>' +
-      '<div class="panel"><h3>Scratchpad</h3><textarea id="notes" placeholder="Structure, assumptions, numbers…"></textarea></div>' +
-      '<div class="panel"><button class="btn" id="finish">I\'m done — show the debrief</button></div>' +
-      '<div id="debrief" hidden>' + guide +
-        '<div class="panel"><h3>How you\'re scored</h3><ul>' + k.rubric.map(([d, h]) => '<li><b>' + esc(d) + '</b> — ' + esc(h) + '</li>').join('') + '</ul></div>' +
+    main +=
+      '<div class="callout">' + icon('flag') + '<div><b>Candidate mode.</b> Read the brief' + (kind === 'case' && x.exhibits && x.exhibits.length ? ' and the data' : '') + ', take a minute to structure, then think out loud. Expect follow-ups that push on your numbers.</div></div>' +
+      card('pen', 'Scratchpad', '<textarea id="notes" placeholder="Structure, assumptions, numbers…"></textarea>') +
+      '<div><button class="btn primary" id="finish">' + icon('check') + 'I\'m done — show the debrief</button></div>' +
+      '<div id="debrief" hidden style="display:flex;flex-direction:column;gap:14px">' + guide +
+        card('star', 'How you\'re scored', '<ul>' + k.rubric.map(([d, h]) => '<li><b>' + esc(d) + '</b> — ' + esc(h) + '</li>').join('') + '</ul>') +
       '</div>';
   }
 
-  const el = $('#case');
-  el.innerHTML = html;
-  el.hidden = false;
-  $('#list').hidden = true; $('#more').hidden = true; $('#rcount').hidden = true;
+  // ---- aside: session panel ----
+  const partner = iv ? 'candidate' : 'interviewer';
+  const aside =
+    '<div class="card"><div class="card-h">' + icon('clock') + 'Session<span class="right">Target ' + min + ' min</span></div><div class="card-b">' +
+      '<div class="clock" id="clock">0:00</div><div class="bar" id="timebar"><i></i></div>' +
+      '<div class="btn-row"><button class="btn primary sm" id="tstart">Start</button><button class="btn sm" id="treset">Reset</button></div>' +
+    '</div></div>' +
+    '<div class="card"><div class="card-h">' + icon(iv ? 'mic' : 'brain') + 'Your side</div><div class="card-b">' +
+      '<div class="role-pill">' + (iv ? 'Interviewer' : 'Candidate') + '</div>' +
+      '<p class="muted" style="margin:4px 0 10px">Send your partner the ' + partner + ' view of this ' + (kind === 'case' ? 'case' : 'question') + '.</p>' +
+      '<div class="btn-row"><button class="btn sm" data-link="' + partner + '">' + icon('link') + 'Copy ' + partner + ' link</button>' +
+      '<button class="btn ghost sm" id="switchside">' + icon('swap') + 'Switch side</button></div><div class="copied" id="copied"></div>' +
+    '</div></div>' +
+    frameworkCard(false);
+
+  el.innerHTML = html + '<div class="layout"><div class="main">' + main + '</div><aside class="aside">' + aside + '</aside></div>';
 
   $('#backlist').addEventListener('click', backToList);
   $('#switchside').addEventListener('click', () => setRole(null));
@@ -541,14 +690,19 @@ function openItem(kind, id, resetTimer = true) {
 
   if (iv) {
     const scores = {};
-    el.querySelectorAll('.score').forEach((row) => row.querySelectorAll('button').forEach((b, i) => b.addEventListener('click', () => {
+    el.querySelectorAll('.seg').forEach((row) => row.querySelectorAll('button').forEach((b, i) => b.addEventListener('click', () => {
       row.querySelectorAll('button').forEach((y, j) => y.setAttribute('aria-pressed', String(i === j)));
       scores[row.dataset.row] = i + 1;
       const vals = Object.values(scores);
       const sum = vals.reduce((a, v) => a + v, 0);
+      const max = k.rubric.length * 4;
       const avg = sum / vals.length;
-      const verdict = vals.length < k.rubric.length ? '' : avg >= 3.4 ? ' — strong hire signal' : avg >= 2.8 ? ' — lean hire' : avg >= 2.2 ? ' — lean no hire' : ' — needs work';
-      $('#total').innerHTML = 'Total: <b>' + sum + ' / ' + k.rubric.length * 4 + '</b>' + esc(verdict);
+      const complete = vals.length === k.rubric.length;
+      const [label, tone] = !complete ? [vals.length + ' of ' + k.rubric.length + ' scored', ''] :
+        avg >= 3.4 ? ['Strong hire', 'good'] : avg >= 2.8 ? ['Lean hire', 'good'] : avg >= 2.2 ? ['Lean no hire', 'warn'] : ['Needs work', 'warn'];
+      $('#total').textContent = sum + ' / ' + max;
+      $('#scorebar > i').style.width = (sum / max * 100) + '%';
+      const v = $('#verdict'); v.textContent = label; v.className = 'verdict ' + tone;
       markDone(x.id);
     })));
   } else {
@@ -557,13 +711,12 @@ function openItem(kind, id, resetTimer = true) {
       $('#debrief').scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   }
-  current.min = min;
   renderClock();
   syncHash();
-  el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  window.scrollTo({ top: 0 });
 }
 
-function markDone(id) { done.add(id); store.set('done', [...done]); }
+function markDone(id) { done.add(id); store.set('done', [...done]); renderProgress(); }
 
 /* ---------- timer ---------- */
 function toggleTimer() {
@@ -582,8 +735,11 @@ function renderClock() {
   const el = $('#clock'); if (!el) return;
   const ms = timer.id ? Date.now() - timer.start : timer.elapsed;
   const s = Math.floor(ms / 1000);
+  const over = !!current && s >= current.min * 60;
   el.textContent = Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
-  el.classList.toggle('over', !!current && s >= current.min * 60);
+  el.classList.toggle('over', over);
+  const bar = $('#timebar');
+  if (bar && current) { bar.classList.toggle('over', over); bar.firstChild.style.width = Math.min(100, s / (current.min * 60) * 100) + '%'; }
 }
 
 /* ---------- links ---------- */
@@ -596,7 +752,7 @@ function syncHash() {
 function copyLink(forRole) {
   const key = current.kind === 'case' ? 'case=' : 'q=';
   const url = location.origin + location.pathname + '#role=' + forRole + '&' + key + current.item.id;
-  const ok = () => { $('#copied').textContent = 'Copied!'; setTimeout(() => { const c = $('#copied'); if (c) c.textContent = ''; }, 2000); };
+  const ok = () => { $('#copied').textContent = 'Link copied — send it to your partner.'; setTimeout(() => { const c = $('#copied'); if (c) c.textContent = ''; }, 2500); };
   if (navigator.clipboard) navigator.clipboard.writeText(url).then(ok, () => prompt('Copy this link:', url));
   else prompt('Copy this link:', url);
 }
@@ -613,10 +769,13 @@ function copyLink(forRole) {
   Object.values(SOURCES).forEach(add);
   (window.PM_CASES_A_SOURCES || []).forEach(add);
   (window.PM_CASES_B_SOURCES || []).forEach(add);
+  $('#n-sources').textContent = seen.size;
   $('#sources').innerHTML = [...seen].map(([url, name]) => '<li><a href="' + esc(url) + '" rel="noopener" target="_blank">' + esc(name) + '</a></li>').join('');
 })();
 
 /* ---------- boot ---------- */
+renderKpis();
+renderProgress();
 renderCompanies();
 renderCats();
 // Also runs on hashchange, so a shared link pasted into an open tab works (replaceState doesn't fire it).
@@ -624,6 +783,7 @@ function boot() {
   const p = new URLSearchParams(location.hash.slice(1));
   const r = p.get('role');
   const cid = p.get('case'), qid = p.get('q');
+  current = null;
   if (cid && CASES.some((c) => c.id === cid)) current = { kind: 'case', item: CASES.find((c) => c.id === cid) };
   else if (qid && BANK.some((q) => q.id === qid)) current = { kind: 'bank', item: BANK.find((q) => q.id === qid) };
   role = r === 'interviewer' || r === 'candidate' ? r : null;
