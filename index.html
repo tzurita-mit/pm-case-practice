@@ -224,20 +224,9 @@
 
   <hr class="rule">
 
-  <p class="label">1 · Choose your side</p>
-  <div class="roles" role="group" aria-label="Role">
-    <button class="role" data-role="interviewer" aria-pressed="false">
-      <strong>I'm the interviewer</strong>
-      <span>See the full case packet plus the answer guide: follow-ups to probe with, what a strong answer covers, the key insight, and a scoring rubric.</span>
-    </button>
-    <button class="role" data-role="candidate" aria-pressed="false">
-      <strong>I'm being interviewed</strong>
-      <span>See the case packet — prompt, context and data exhibits — with a timer and scratchpad. The answer guide unlocks when you finish.</span>
-    </button>
-  </div>
-
-  <div id="picker" hidden>
-    <div class="tabs" role="tablist">
+  <div id="picker">
+    <p class="label">1 · Pick a case</p>
+    <div class="tabs" role="tablist" style="margin-top:0">
       <button class="tab" role="tab" data-tab="cases" aria-selected="true">Full cases with data<span class="count" id="n-cases"></span></button>
       <button class="tab" role="tab" data-tab="bank" aria-selected="false">Question bank<span class="count" id="n-bank"></span></button>
     </div>
@@ -357,14 +346,22 @@ const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&':
 const li = (arr) => (arr || []).map((x) => '<li>' + esc(x) + '</li>').join('');
 
 /* ---------- role ---------- */
-document.querySelectorAll('.role').forEach((b) => b.addEventListener('click', () => setRole(b.dataset.role)));
+// The side is chosen per case, after the case is picked.
 function setRole(r) {
   role = r;
-  document.querySelectorAll('.role').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.role === r)));
-  $('#picker').hidden = false;
-  if (current) openItem(current.kind, current.item.id, false); else renderList();
+  if (current) openItem(current.kind, current.item.id, false);
   syncHash();
 }
+function roleChooser() {
+  return '<p class="label" style="margin-top:1.6rem">2 · Choose your side</p>' +
+    '<div class="roles" role="group" aria-label="Role">' +
+      '<button class="role" data-role="interviewer"><strong>I\'m the interviewer</strong>' +
+      '<span>See the full case packet plus the answer guide: follow-ups to probe with, what a strong answer covers, the key insight, and a scoring rubric.</span></button>' +
+      '<button class="role" data-role="candidate"><strong>I\'m being interviewed</strong>' +
+      '<span>See the case packet — prompt, context and data — with a timer and scratchpad. The answer guide unlocks when you finish.</span></button>' +
+    '</div>';
+}
+function pickNew(kind, id) { role = null; openItem(kind, id); }
 
 /* ---------- tabs + filters ---------- */
 $('#n-cases').textContent = CASES.length;
@@ -421,7 +418,7 @@ function renderList() {
     return '<li><button data-id="' + esc(x.id) + '"><span class="q' + isDone + '">' + esc(x.q) + lvl + '</span>' +
       '<span class="m">' + esc(CATS[x.cat].name) + ' · ' + esc(x.co || 'General') + '</span></button></li>';
   }).join('');
-  $('#list').querySelectorAll('button').forEach((b) => b.addEventListener('click', () => openItem(tab === 'cases' ? 'case' : 'bank', b.dataset.id)));
+  $('#list').querySelectorAll('button').forEach((b) => b.addEventListener('click', () => pickNew(tab === 'cases' ? 'case' : 'bank', b.dataset.id)));
   $('#more').hidden = items.length <= shown;
   $('#more').textContent = 'Show more (' + (items.length - shown) + ' left)';
 }
@@ -431,7 +428,7 @@ $('#random').addEventListener('click', () => {
   if (!items.length) return;
   const fresh = items.filter((x) => !done.has(x.id));
   const from = fresh.length ? fresh : items;
-  openItem(tab === 'cases' ? 'case' : 'bank', from[Math.floor(Math.random() * from.length)].id);
+  pickNew(tab === 'cases' ? 'case' : 'bank', from[Math.floor(Math.random() * from.length)].id);
 });
 
 /* ---------- item view ---------- */
@@ -443,6 +440,7 @@ function exhibitHtml(e) {
 }
 
 function closeItem() { current = null; stopTimer(true); $('#case').hidden = true; $('#case').innerHTML = ''; syncHash(); }
+function backToList() { role = null; closeItem(); renderList(); window.scrollTo({ top: $('#picker').offsetTop - 20, behavior: 'smooth' }); }
 
 function openItem(kind, id, resetTimer = true) {
   const list = kind === 'case' ? CASES : BANK;
@@ -462,7 +460,23 @@ function openItem(kind, id, resetTimer = true) {
     '<div class="case-head" style="margin-top:1.2rem"><span class="tag">' + esc(k.name.toUpperCase()) + '</span>' +
     (x.style ? '<span class="tag">' + esc(x.style) + '</span>' : '') + (x.co ? '<span class="tag">' + esc(x.co) + '</span>' : '') +
     (x.lvl ? '<span class="tag">' + esc(x.lvl) + '</span>' : '') + '<span class="tag">' + min + ' min</span></div>' +
-    '<h2>' + esc(title) + '</h2>' +
+    '<h2>' + esc(title) + '</h2>';
+
+  if (!role) {
+    const el = $('#case');
+    el.innerHTML = html + roleChooser();
+    el.hidden = false;
+    $('#list').hidden = true; $('#more').hidden = true; $('#rcount').hidden = true;
+    $('#backlist').addEventListener('click', backToList);
+    el.querySelectorAll('.role').forEach((b) => b.addEventListener('click', () => setRole(b.dataset.role)));
+    syncHash();
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    return;
+  }
+
+  html +=
+    '<p class="share" style="margin-top:.6rem">You\'re ' + (iv ? 'the interviewer' : 'being interviewed') +
+    ' · <button class="btn ghost" id="switchside">Switch side</button></p>' +
     '<div class="prompt"><p class="say">' + (iv ? 'Read this aloud' : 'Your interviewer asks') + '</p>' + esc(kind === 'case' ? x.prompt : x.q) + '</div>' + src;
 
   // case packet — shared with both people
@@ -514,7 +528,8 @@ function openItem(kind, id, resetTimer = true) {
   el.hidden = false;
   $('#list').hidden = true; $('#more').hidden = true; $('#rcount').hidden = true;
 
-  $('#backlist').addEventListener('click', () => { closeItem(); renderList(); window.scrollTo({ top: $('#picker').offsetTop - 20, behavior: 'smooth' }); });
+  $('#backlist').addEventListener('click', backToList);
+  $('#switchside').addEventListener('click', () => setRole(null));
   $('#tstart').addEventListener('click', toggleTimer);
   $('#treset').addEventListener('click', () => stopTimer(true));
   el.querySelector('[data-link]').addEventListener('click', (e) => copyLink(e.currentTarget.dataset.link));
@@ -611,7 +626,8 @@ function boot() {
   const cid = p.get('case'), qid = p.get('q');
   if (cid && CASES.some((c) => c.id === cid)) current = { kind: 'case', item: CASES.find((c) => c.id === cid) };
   else if (qid && BANK.some((q) => q.id === qid)) current = { kind: 'bank', item: BANK.find((q) => q.id === qid) };
-  if (r === 'interviewer' || r === 'candidate') setRole(r);
+  role = r === 'interviewer' || r === 'candidate' ? r : null;
+  if (current) openItem(current.kind, current.item.id); else renderList();
 }
 boot();
 window.addEventListener('hashchange', boot);
