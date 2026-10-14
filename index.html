@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PM Case Practice</title>
+<meta name="description" content="Free PM interview practice: data-rich product management cases and a big question bank. Pick a case, then play the interviewer or the candidate.">
+<style>
+  :root {
+    --paper:      #fbfaf7;
+    --card:       #ffffff;
+    --ink:        #1a1a18;
+    --ink-soft:   #4a4a46;
+    --ink-faint:  #77756e;
+    --navy:       #1f3a5f;
+    --navy-wash:  #e9eef5;
+    --amber:      #8a5a00;
+    --amber-wash: #f7efdc;
+    --rule:       #ddd9d0;
+    --rule-soft:  #e8e5de;
+
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, "Times New Roman", serif;
+    --sans:  ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --page:  52rem;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:      #16161a;
+      --card:       #1d1d22;
+      --ink:        #ece9e3;
+      --ink-soft:   #b3afa7;
+      --ink-faint:  #8d8a83;
+      --navy:       #9db8dc;
+      --navy-wash:  #222b38;
+      --amber:      #e0b45c;
+      --amber-wash: #2c2618;
+      --rule:       #34343b;
+      --rule-soft:  #26262c;
+    }
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    padding-block: clamp(2.5rem, 7vw, 5rem) clamp(3rem, 7vw, 5rem);
+    padding-inline: max(1rem, calc((100vw - var(--page)) / 2));
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--navy); text-decoration: none; border-bottom: 1px solid color-mix(in srgb, var(--navy) 35%, transparent); }
+  a:hover { border-bottom-color: var(--navy); }
+  button, select, textarea { font: inherit; color: inherit; }
+  :focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; }
+
+  .back { font-size: 0.8125rem; color: var(--ink-faint); }
+  h1 {
+    font-family: var(--serif); font-weight: 400;
+    font-size: clamp(2.1rem, 7vw, 3.1rem); line-height: 1.08; letter-spacing: -0.02em;
+    margin: 0.9rem 0 0;
+  }
+  .lede { font-family: var(--serif); font-style: italic; color: var(--ink-soft); font-size: 1.125rem; max-width: 36rem; margin: 0.8rem 0 0; }
+  hr.rule { border: 0; border-top: 1px solid var(--ink); opacity: 0.85; margin: 2rem 0; }
+
+  .label {
+    font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--ink-faint); margin: 0 0 0.8rem;
+  }
+
+  /* ---------- role picker ---------- */
+  .roles { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 0.9rem; }
+  .role {
+    text-align: left; background: var(--card); border: 1px solid var(--rule); border-radius: 10px;
+    padding: 1.1rem 1.2rem; cursor: pointer; transition: border-color .15s, background .15s;
+  }
+  .role:hover { border-color: var(--ink-faint); }
+  .role[aria-pressed="true"] { border-color: var(--navy); background: var(--navy-wash); box-shadow: inset 0 0 0 1px var(--navy); }
+  .role strong { display: block; font-family: var(--serif); font-weight: 400; font-size: 1.3rem; }
+  .role span { font-size: 0.875rem; color: var(--ink-soft); }
+
+  /* ---------- toolbar ---------- */
+  .toolbar { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; margin-top: 1.6rem; }
+  .chips { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .chip {
+    border: 1px solid var(--rule); background: transparent; border-radius: 999px;
+    padding: 0.28rem 0.8rem; font-size: 0.8125rem; cursor: pointer; color: var(--ink-soft);
+  }
+  .chip[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .btn {
+    border: 1px solid var(--ink); background: var(--ink); color: var(--paper);
+    border-radius: 8px; padding: 0.45rem 0.95rem; font-size: 0.875rem; cursor: pointer;
+  }
+  .btn.ghost { background: transparent; color: var(--ink); border-color: var(--rule); }
+  .btn.ghost:hover { border-color: var(--ink-faint); }
+  .spacer { flex: 1; }
+
+  /* ---------- case list ---------- */
+  .list { list-style: none; padding: 0; margin: 1.2rem 0 0; border-top: 1px solid var(--rule); }
+  .list li { border-bottom: 1px solid var(--rule-soft); }
+  .list button {
+    width: 100%; text-align: left; background: none; border: 0; padding: 0.8rem 0.2rem; cursor: pointer;
+    display: grid; grid-template-columns: 1fr auto; gap: 0.2rem 1rem; align-items: baseline;
+  }
+  .list button:hover .t { color: var(--navy); }
+  .list .t { font-family: var(--serif); font-size: 1.0625rem; }
+  .list .m { font-size: 0.75rem; color: var(--ink-faint); white-space: nowrap; }
+  .list .done::after { content: " ✓"; color: var(--navy); }
+
+  /* ---------- case view ---------- */
+  .case { margin-top: 1.4rem; }
+  .case[hidden], [hidden] { display: none !important; }
+  .case-head { display: flex; flex-wrap: wrap; gap: 0.4rem 0.8rem; align-items: baseline; }
+  .tag { font-size: 0.75rem; letter-spacing: 0.04em; color: var(--ink-faint); }
+  .case h2 { font-family: var(--serif); font-weight: 400; font-size: clamp(1.5rem, 4.5vw, 2rem); line-height: 1.2; margin: 0.4rem 0 0; }
+
+  .prompt {
+    margin: 1.2rem 0 0; padding: 1.1rem 1.3rem; background: var(--card);
+    border: 1px solid var(--rule); border-left: 3px solid var(--navy); border-radius: 6px;
+    font-family: var(--serif); font-size: 1.1875rem; line-height: 1.55;
+  }
+  .say { font-size: 0.75rem; color: var(--ink-faint); margin: 0 0 0.3rem; font-family: var(--sans); }
+
+  .timer-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; margin-top: 1.1rem; }
+  .clock { font-variant-numeric: tabular-nums; font-size: 1.6rem; font-family: var(--serif); min-width: 4.5rem; }
+  .clock.over { color: var(--amber); }
+
+  .panel { margin-top: 1.6rem; }
+  .panel h3 { font-family: var(--serif); font-weight: 400; font-size: 1.25rem; margin: 0 0 0.6rem; }
+  .panel ul { margin: 0; padding-left: 1.2rem; }
+  .panel li { margin: 0.25rem 0; color: var(--ink-soft); }
+  .panel li b { color: var(--ink); font-weight: 600; }
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr)); gap: 0 2rem; }
+
+  .note {
+    background: var(--amber-wash); color: var(--ink); border-radius: 6px; padding: 0.7rem 0.95rem;
+    font-size: 0.875rem; margin-top: 1.2rem;
+  }
+  .note b { color: var(--amber); }
+
+  details { border: 1px solid var(--rule); border-radius: 8px; padding: 0.7rem 1rem; margin-top: 0.8rem; background: var(--card); }
+  details summary { cursor: pointer; font-weight: 600; font-size: 0.9375rem; }
+  details[open] summary { margin-bottom: 0.5rem; }
+
+  .framework { counter-reset: s; list-style: none; padding: 0 !important; }
+  .framework li { counter-increment: s; position: relative; padding-left: 2rem !important; }
+  .framework li::before {
+    content: counter(s); position: absolute; left: 0; top: 0.1rem; width: 1.4rem; height: 1.4rem;
+    border-radius: 50%; background: var(--navy-wash); color: var(--navy); font-size: 0.75rem;
+    display: grid; place-items: center; font-weight: 600;
+  }
+
+  /* rubric */
+  .rubric { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+  .rubric td { padding: 0.55rem 0; border-bottom: 1px solid var(--rule-soft); vertical-align: top; }
+  .rubric td:first-child { padding-right: 1rem; }
+  .rubric .d { font-weight: 600; }
+  .rubric .h { color: var(--ink-faint); font-size: 0.8125rem; }
+  .score { display: flex; gap: 0.25rem; }
+  .score button {
+    width: 2rem; height: 2rem; border-radius: 6px; border: 1px solid var(--rule); background: transparent; cursor: pointer; font-size: 0.8125rem;
+  }
+  .score button[aria-pressed="true"] { background: var(--navy); color: var(--paper); border-color: var(--navy); }
+  .total { margin-top: 0.8rem; font-size: 0.9375rem; }
+  .total b { font-family: var(--serif); font-size: 1.25rem; font-weight: 400; }
+
+  textarea {
+    width: 100%; min-height: 8rem; resize: vertical; border: 1px solid var(--rule); border-radius: 8px;
+    padding: 0.7rem 0.85rem; background: var(--card); line-height: 1.5; font-size: 0.9375rem;
+  }
+
+  .share { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin-top: 1rem; font-size: 0.8125rem; color: var(--ink-faint); }
+
+  .sources { margin-top: 3rem; font-size: 0.8125rem; color: var(--ink-faint); }
+  .sources ul { padding-left: 1.1rem; }
+
+  @media (max-width: 480px) {
+    .list button { grid-template-columns: 1fr; }
+    .score button { width: 1.85rem; height: 1.85rem; }
+  }
+
+  /* ---------- v2: tabs, filters, briefs, exhibits, bank ---------- */
+  .tabs { display: flex; gap: 0; border-bottom: 1px solid var(--rule); margin-top: 2rem; }
+  .tab {
+    background: none; border: 0; border-bottom: 2px solid transparent; padding: 0.55rem 1rem 0.6rem;
+    cursor: pointer; font-size: 0.9375rem; color: var(--ink-soft); margin-bottom: -1px;
+  }
+  .tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); font-weight: 600; }
+  .tab .count { font-size: 0.75rem; color: var(--ink-faint); font-weight: 400; margin-left: 0.3rem; }
+  .filters { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin-top: 0.9rem; width: 100%; }
+  .filters input[type="search"], .filters select {
+    border: 1px solid var(--rule); background: var(--card); border-radius: 8px; padding: 0.4rem 0.7rem; font-size: 0.875rem;
+  }
+  .filters input[type="search"] { flex: 1 1 14rem; min-width: 0; }
+  .result-count { font-size: 0.8125rem; color: var(--ink-faint); margin: 0.9rem 0 0; }
+  .lvl { font-size: 0.6875rem; padding: 0.05rem 0.45rem; border-radius: 999px; border: 1px solid var(--rule); color: var(--ink-soft); margin-left: 0.4rem; vertical-align: 2px; font-family: var(--sans); }
+  .list .q { font-family: var(--serif); font-size: 1.0625rem; }
+  .list .data-flag { color: var(--navy); font-size: 0.75rem; margin-left: 0.4rem; font-family: var(--sans); }
+  .more { margin: 1rem 0 0; }
+
+  .brief { margin-top: 1.4rem; }
+  .brief ul { margin: 0; padding-left: 1.2rem; }
+  .brief li { margin: 0.3rem 0; }
+  .exhibit { margin-top: 1.1rem; border: 1px solid var(--rule); border-radius: 8px; background: var(--card); overflow: hidden; }
+  .exhibit h4 { margin: 0; padding: 0.6rem 0.9rem; font-size: 0.875rem; font-weight: 600; border-bottom: 1px solid var(--rule-soft); background: var(--navy-wash); }
+  .exhibit .scroll { overflow-x: auto; }
+  .exhibit table { width: 100%; border-collapse: collapse; font-size: 0.875rem; font-variant-numeric: tabular-nums; }
+  .exhibit th, .exhibit td { padding: 0.45rem 0.9rem; text-align: right; border-bottom: 1px solid var(--rule-soft); white-space: nowrap; }
+  .exhibit th:first-child, .exhibit td:first-child { text-align: left; white-space: normal; min-width: 8rem; }
+  .exhibit th { font-weight: 600; color: var(--ink-soft); font-size: 0.8125rem; }
+  .exhibit tr:last-child td { border-bottom: 0; }
+  .exhibit .src-note { padding: 0.45rem 0.9rem; font-size: 0.75rem; color: var(--ink-faint); border-top: 1px solid var(--rule-soft); }
+  .insight { margin-top: 1.2rem; padding: 0.85rem 1rem; border-radius: 8px; background: var(--navy-wash); }
+  .insight b { color: var(--navy); }
+  .src-line { font-size: 0.8125rem; color: var(--ink-faint); margin-top: 0.6rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>PM Case Practice</h1>
+  <p class="lede">Grab a friend, pick a case, and choose a side of the table. One of you interviews, the other answers — then swap.</p>
+
+  <hr class="rule">
+
+  <p class="label">1 · Choose your side</p>
+  <div class="roles" role="group" aria-label="Role">
+    <button class="role" data-role="interviewer" aria-pressed="false">
+      <strong>I'm the interviewer</strong>
+      <span>See the full case packet plus the answer guide: follow-ups to probe with, what a strong answer covers, the key insight, and a scoring rubric.</span>
+    </button>
+    <button class="role" data-role="candidate" aria-pressed="false">
+      <strong>I'm being interviewed</strong>
+      <span>See the case packet — prompt, context and data exhibits — with a timer and scratchpad. The answer guide unlocks when you finish.</span>
+    </button>
+  </div>
+
+  <div id="picker" hidden>
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" data-tab="cases" aria-selected="true">Full cases with data<span class="count" id="n-cases"></span></button>
+      <button class="tab" role="tab" data-tab="bank" aria-selected="false">Question bank<span class="count" id="n-bank"></span></button>
+    </div>
+    <div class="toolbar" style="margin-top:1rem">
+      <div class="chips" id="cats" role="group" aria-label="Category"></div>
+      <div class="filters">
+        <input type="search" id="search" placeholder="Search questions, companies, industries…" aria-label="Search">
+        <select id="lvl" aria-label="Difficulty"><option value="">Any difficulty</option><option>Easy</option><option>Medium</option><option>Hard</option></select>
+        <select id="co" aria-label="Company" hidden></select>
+        <button class="btn" id="random">Random</button>
+      </div>
+    </div>
+    <p class="result-count" id="rcount"></p>
+    <ul class="list" id="list"></ul>
+    <div class="more"><button class="btn ghost" id="more" hidden>Show more</button></div>
+  </div>
+
+  <section class="case" id="case" hidden aria-live="polite"></section>
+
+  <div class="sources">
+    <p class="label">Where these come from</p>
+    <p>Full cases use fictional or clearly illustrative data built around question types widely reported from PM loops. Bank questions are paraphrased from the public sources below, tagged by the company they were reported at. Rubrics adapt publicly described evaluation criteria — no company's internal rubric is reproduced.</p>
+    <ul id="sources"></ul>
+  </div>
+</main>
+
+<script src="pm/cases-core.js"></script>
+<script src="pm/cases-a.js"></script>
+<script src="pm/cases-b.js"></script>
+<script src="pm/bank.js"></script>
+<script>
+/* ---------- frameworks, rubrics and generic probes per category ---------- */
+const CATS = {
+  design: {
+    name: 'Product design',
+    framework: ['Clarify the goal and constraints (why would this company build it?)', 'Pick and justify one user segment', 'List that segment\'s pain points; prioritise one or two', 'Brainstorm 3–5 solutions, at least one bold', 'Prioritise (impact vs. effort) and describe the MVP', 'Define success metrics and name the biggest risks'],
+    rubric: [['Structure & communication', 'Signposts, checks in, easy to follow'], ['User empathy & segmentation', 'Picks a segment deliberately, real pain points'], ['Creativity', 'Solutions beyond the obvious, tied to pains'], ['Prioritisation', 'Explicit criteria, defends the cut'], ['Metrics & risks', 'Success measure tied to the goal, names trade-offs']],
+    probes: ['Why did you pick that segment over the others?', 'What is the single riskiest assumption in your solution?', 'If you could only ship one thing in 3 months, what is it?', 'How would you know in 6 months that this worked?', 'What would a competitor do in response?']
+  },
+  improve: {
+    name: 'Product improvement',
+    framework: ['Clarify which surface, and what "better" means for the company', 'Describe the product\'s users and its job-to-be-done today', 'Pick one segment and walk its journey — where does it break?', 'Prioritise one pain point', 'Propose 3+ improvements, choose one and explain why', 'Define a primary metric and a guardrail'],
+    rubric: [['Structure & communication', 'Signposts, checks in, easy to follow'], ['Product understanding', 'Knows what the product is for today'], ['User insight', 'Grounded pain points, not feature wishes'], ['Solution quality', 'Specific, feasible, addresses the pain'], ['Metrics & trade-offs', 'Primary metric + guardrail, aware of cannibalisation']],
+    probes: ['What is this product\'s mission, in one sentence?', 'Which user segment is under-served today?', 'How would this change affect other parts of the product?', 'What A/B test would you run first?', 'What is your guardrail metric?']
+  },
+  metrics: {
+    name: 'Metrics & success',
+    framework: ['Restate the product\'s mission and how it creates value', 'Map the journey / funnel (acquire → activate → engage → retain → monetise)', 'Pick one North Star metric and justify it', 'Add 2–3 supporting metrics and 1–2 guardrails', 'Discuss trade-offs and how metrics could be gamed', 'Say what you\'d do if two metrics disagree'],
+    rubric: [['Goal clarity', 'Ties metrics to the product\'s purpose'], ['Metric selection', 'Precise definitions (who, what, time window)'], ['Guardrails & trade-offs', 'Anticipates harm and gaming'], ['Data literacy', 'Comfortable with ratios, cohorts, experiments'], ['Communication', 'Concise, decisive, checks in']],
+    probes: ['If you could only track one metric, which and why?', 'Define that metric precisely — numerator, denominator, time window.', 'How could a team game this metric?', 'Your North Star goes up but a guardrail goes down. Ship or not?', 'How long would you run the experiment?']
+  },
+  rca: {
+    name: 'Root cause',
+    framework: ['Clarify the metric definition, size and timing of the change', 'Rule out data issues (logging, tracking, definition changes)', 'Check external factors (seasonality, competitors, news, outages)', 'Segment: platform, geo, app version, new vs. existing users, funnel step', 'Form hypotheses, rank them, say what data confirms each', 'Recommend next steps and a fix'],
+    rubric: [['Clarification', 'Asks the right questions before diving in'], ['Isolating variables', 'Systematic segmentation, narrows quickly'], ['Hypothesis quality', 'Plausible, ranked, testable'], ['Data literacy', 'Knows which data answers which question'], ['Action orientation', 'Lands on a decision and next steps']],
+    probes: ['Was the change sudden or gradual — and why does that matter?', 'How do you rule out a data/logging problem?', 'Which segment would you cut by first?', 'What is your top hypothesis and what data would prove it?', 'What do you do in the next 24 hours?']
+  },
+  estimate: {
+    name: 'Estimation',
+    framework: ['Clarify exactly what is counted (unit, geography, time period)', 'Choose top-down or bottom-up and say why', 'Break it into 3–5 factors; state each assumption out loud', 'Do the math with round numbers', 'Sanity-check against something you know', 'Name the assumption the answer is most sensitive to'],
+    rubric: [['Structure', 'Clean decomposition before numbers'], ['Assumptions', 'Stated, reasonable, justified'], ['Math', 'Accurate, round numbers, no stalls'], ['Sanity check', 'Triangulates the result'], ['Communication', 'Walks the interviewer through it']],
+    probes: ['Which assumption are you least confident in?', 'Can you sanity-check with a supply-side approach?', 'How would this number change in 5 years?', 'How would you validate this with real data?']
+  },
+  strategy: {
+    name: 'Strategy',
+    framework: ['Clarify the objective (growth, defence, new revenue?) and time horizon', 'Assess the market: size, growth, customer needs', 'Assess competition and the company\'s right to win', 'Lay out 2–3 options (build / buy / partner / don\'t)', 'Pick one with explicit criteria; name risks and mitigations', 'Say how you\'d know in 12 months whether it worked'],
+    rubric: [['Business judgment', 'Understands how the company makes money'], ['Market & competition', 'Uses relevant facts, not generic lists'], ['Options & decision', 'Weighs alternatives, commits to one'], ['Risk awareness', 'Names what could go wrong and mitigations'], ['Communication', 'Top-down, crisp recommendation']],
+    probes: ['What is the company\'s right to win here?', 'Build, buy or partner — and why?', 'What would make you reverse your recommendation?', 'How do competitors respond?', 'What does success look like in 12 months?']
+  },
+  gtm: {
+    name: 'Go-to-market & pricing',
+    framework: ['Clarify the product, target customer and business goal', 'Segment customers by need and willingness to pay', 'Choose positioning and the launch segment (beachhead)', 'Set pricing model and packaging (value metric, tiers, fences)', 'Pick channels and launch sequence', 'Define launch metrics and what would make you change course'],
+    rubric: [['Customer & segment', 'Clear beachhead, grounded in needs'], ['Pricing logic', 'Value-based, sensible value metric and fences'], ['Channels & launch plan', 'Realistic, sequenced, matches the buyer'], ['Economics', 'CAC, payback, margins considered'], ['Communication', 'Crisp recommendation']],
+    probes: ['Who exactly is your first customer?', 'What is your value metric — what do you charge for?', 'How do you stop existing customers from downgrading?', 'Which channel would you test first and why?', 'What launch metric would make you pull back?']
+  },
+  technical: {
+    name: 'Technical',
+    framework: ['Restate the user/business need behind the technical question', 'Sketch how the system works at a high level (components, data flow)', 'Lay out options and their trade-offs (latency, cost, reliability, effort)', 'Pick an option and explain the decision criteria', 'Plan rollout, migration and failure handling', 'Define technical and product success metrics'],
+    rubric: [['Technical fluency', 'Explains systems clearly and correctly'], ['Trade-off reasoning', 'Weighs latency, cost, reliability, effort'], ['User focus', 'Connects tech choices to user impact'], ['Execution', 'Rollout, migration, risk mitigation'], ['Communication', 'Clear for engineers and non-engineers']],
+    probes: ['What happens when this component fails?', 'How would you explain this trade-off to a non-technical exec?', 'What would you build first, and what can wait?', 'How do you measure whether the system is healthy?']
+  },
+  behavioral: {
+    name: 'Behavioral',
+    framework: ['Situation — one or two sentences of context', 'Task — what you specifically owned', 'Action — what YOU did (use "I"), including the hard choices', 'Result — quantified outcome', 'Reflection — what you learned / would do differently'],
+    rubric: [['Ownership', 'Clear personal role, takes responsibility'], ['Influence & collaboration', 'Works through others without authority'], ['Judgment', 'Sound reasoning on the hard choice'], ['Impact', 'Concrete, quantified result'], ['Self-awareness', 'Honest reflection, growth']],
+    probes: ['What exactly did YOU do, versus the team?', 'What was the hardest moment, and how did you decide?', 'How did you measure the result?', 'What would you do differently today?', 'What did the other person think of you afterwards?']
+  },
+  ai: {
+    name: 'AI product',
+    framework: ['Clarify the user problem — is AI the right tool?', 'Define the user, the job, and what "good output" looks like', 'Design the experience, including how users correct or override the model', 'Handle failure modes: hallucination, bias, safety, privacy, latency, cost', 'Define quality evals plus product metrics', 'Plan the launch: who first, what guardrails, how you iterate'],
+    rubric: [['Problem framing', 'Starts from user need, not the technology'], ['UX for uncertainty', 'Designs for wrong answers and human control'], ['Risk & responsibility', 'Safety, privacy, bias, cost considered'], ['Evaluation', 'Offline evals + online metrics'], ['Communication', 'Structured, pragmatic']],
+    probes: ['What happens when the model is confidently wrong?', 'How would you evaluate quality before launch?', 'How do you keep inference cost under control at scale?', 'Which risks would block launch?', 'Why is AI better here than a simpler rule-based solution?']
+  }
+};
+
+/* ---------- data ---------- */
+const CASES = [].concat(window.PM_CASES_CORE || [], window.PM_CASES_A || [], window.PM_CASES_B || [])
+  .filter((c) => CATS[c.cat]);
+// Bank ids are a hash of the question text, so shared links survive bank edits.
+const hashId = (s) => { let h = 5381; for (let i = 0; i < s.length; i++) h = ((h * 33) ^ s.charCodeAt(i)) >>> 0; return h.toString(36); };
+const BANK = (window.PM_BANK || []).filter((q) => CATS[q.cat]).map((q) => Object.assign({ id: hashId(q.q) }, q));
+const SOURCES = window.PM_SOURCES || {};
+
+/* ---------- state ---------- */
+const store = {
+  get(k, d) { try { const v = localStorage.getItem('pm.' + k); return v == null ? d : JSON.parse(v); } catch (_) { return d; } },
+  set(k, v) { try { localStorage.setItem('pm.' + k, JSON.stringify(v)); } catch (_) {} }
+};
+const PAGE = 40;
+let role = null, tab = 'cases', cat = 'all', shown = PAGE;
+let current = null; // { kind: 'case' | 'bank', item }
+let timer = { start: null, elapsed: 0, id: null };
+const done = new Set(store.get('done', []));
+
+const $ = (s, el = document) => el.querySelector(s);
+const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const li = (arr) => (arr || []).map((x) => '<li>' + esc(x) + '</li>').join('');
+
+/* ---------- role ---------- */
+document.querySelectorAll('.role').forEach((b) => b.addEventListener('click', () => setRole(b.dataset.role)));
+function setRole(r) {
+  role = r;
+  document.querySelectorAll('.role').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.role === r)));
+  $('#picker').hidden = false;
+  if (current) openItem(current.kind, current.item.id, false); else renderList();
+  syncHash();
+}
+
+/* ---------- tabs + filters ---------- */
+$('#n-cases').textContent = CASES.length;
+$('#n-bank').textContent = BANK.length;
+document.querySelectorAll('.tab').forEach((t) => t.addEventListener('click', () => setTab(t.dataset.tab)));
+function setTab(t) {
+  tab = t; shown = PAGE;
+  document.querySelectorAll('.tab').forEach((x) => x.setAttribute('aria-selected', String(x.dataset.tab === t)));
+  $('#co').hidden = t !== 'bank';
+  closeItem(); renderCats(); renderList();
+}
+function pool() { return tab === 'cases' ? CASES : BANK; }
+function renderCats() {
+  const counts = {};
+  pool().forEach((x) => { counts[x.cat] = (counts[x.cat] || 0) + 1; });
+  const all = [['all', 'All', pool().length]].concat(Object.keys(CATS).filter((k) => counts[k]).map((k) => [k, CATS[k].name, counts[k]]));
+  if (cat !== 'all' && !counts[cat]) cat = 'all';
+  $('#cats').innerHTML = all.map(([k, n, c]) => '<button class="chip" data-cat="' + k + '" aria-pressed="' + (k === cat) + '">' + esc(n) + ' <span style="opacity:.6">' + c + '</span></button>').join('');
+  $('#cats').querySelectorAll('.chip').forEach((c) => c.addEventListener('click', () => { cat = c.dataset.cat; shown = PAGE; renderCats(); renderList(); }));
+}
+function renderCompanies() {
+  const cos = [...new Set(BANK.map((q) => q.co).filter(Boolean))].sort((a, b) => a === 'General' ? 1 : b === 'General' ? -1 : a.localeCompare(b));
+  $('#co').innerHTML = '<option value="">Any company</option>' + cos.map((c) => '<option>' + esc(c) + '</option>').join('');
+}
+['#search', '#lvl', '#co'].forEach((s) => $(s).addEventListener('input', () => { shown = PAGE; closeItem(); renderList(); }));
+
+function filtered() {
+  const term = $('#search').value.trim().toLowerCase();
+  const lvl = $('#lvl').value;
+  const co = $('#co').value;
+  return pool().filter((x) => {
+    if (cat !== 'all' && x.cat !== cat) return false;
+    if (lvl && x.lvl !== lvl) return false;
+    if (tab === 'bank' && co && x.co !== co) return false;
+    if (!term) return true;
+    const hay = (tab === 'cases'
+      ? [x.title, x.prompt, x.style, (x.brief || []).join(' ')]
+      : [x.q, x.co, (SOURCES[x.src] || {}).name]).join(' ').toLowerCase();
+    return hay.includes(term);
+  });
+}
+function renderList() {
+  $('#list').hidden = false; $('#rcount').hidden = false;
+  const items = filtered();
+  $('#rcount').textContent = items.length + (tab === 'cases' ? ' case' : ' question') + (items.length === 1 ? '' : 's');
+  $('#list').innerHTML = items.slice(0, shown).map((x) => {
+    const isDone = done.has(x.id) ? ' done' : '';
+    const lvl = x.lvl ? '<span class="lvl">' + esc(x.lvl) + '</span>' : '';
+    if (tab === 'cases') {
+      const data = x.exhibits && x.exhibits.length ? '<span class="data-flag">▦ data</span>' : '';
+      return '<li><button data-id="' + esc(x.id) + '"><span class="t' + isDone + '">' + esc(x.title) + lvl + data + '</span>' +
+        '<span class="m">' + esc(CATS[x.cat].name) + ' · ' + esc(x.style) + ' · ' + (x.min || 20) + ' min</span></button></li>';
+    }
+    return '<li><button data-id="' + esc(x.id) + '"><span class="q' + isDone + '">' + esc(x.q) + lvl + '</span>' +
+      '<span class="m">' + esc(CATS[x.cat].name) + ' · ' + esc(x.co || 'General') + '</span></button></li>';
+  }).join('');
+  $('#list').querySelectorAll('button').forEach((b) => b.addEventListener('click', () => openItem(tab === 'cases' ? 'case' : 'bank', b.dataset.id)));
+  $('#more').hidden = items.length <= shown;
+  $('#more').textContent = 'Show more (' + (items.length - shown) + ' left)';
+}
+$('#more').addEventListener('click', () => { shown += PAGE * 2; renderList(); });
+$('#random').addEventListener('click', () => {
+  const items = filtered();
+  if (!items.length) return;
+  const fresh = items.filter((x) => !done.has(x.id));
+  const from = fresh.length ? fresh : items;
+  openItem(tab === 'cases' ? 'case' : 'bank', from[Math.floor(Math.random() * from.length)].id);
+});
+
+/* ---------- item view ---------- */
+function exhibitHtml(e) {
+  return '<div class="exhibit"><h4>' + esc(e.title) + '</h4><div class="scroll"><table><thead><tr>' +
+    (e.cols || []).map((c) => '<th>' + esc(c) + '</th>').join('') + '</tr></thead><tbody>' +
+    (e.rows || []).map((r) => '<tr>' + r.map((v) => '<td>' + esc(v) + '</td>').join('') + '</tr>').join('') +
+    '</tbody></table></div>' + (e.note ? '<div class="src-note">' + esc(e.note) + '</div>' : '') + '</div>';
+}
+
+function closeItem() { current = null; stopTimer(true); $('#case').hidden = true; $('#case').innerHTML = ''; syncHash(); }
+
+function openItem(kind, id, resetTimer = true) {
+  const list = kind === 'case' ? CASES : BANK;
+  const x = list.find((c) => c.id === id);
+  if (!x) return;
+  if (kind !== (tab === 'cases' ? 'case' : 'bank')) { tab = kind === 'case' ? 'cases' : 'bank'; document.querySelectorAll('.tab').forEach((t) => t.setAttribute('aria-selected', String(t.dataset.tab === tab))); $('#co').hidden = tab !== 'bank'; renderCats(); }
+  current = { kind, item: x };
+  if (resetTimer) stopTimer(true);
+  const k = CATS[x.cat];
+  const iv = role === 'interviewer';
+  const min = x.min || ({ estimate: 15, behavioral: 10 })[x.cat] || 25;
+  const title = kind === 'case' ? x.title : x.q;
+  const src = kind === 'bank' && SOURCES[x.src] ? '<p class="src-line">Reported at ' + esc(x.co || 'various companies') + ' · source: <a href="' + esc(SOURCES[x.src].url) + '" rel="noopener" target="_blank">' + esc(SOURCES[x.src].name) + '</a></p>' : '';
+
+  let html =
+    '<button class="btn ghost" id="backlist">← All ' + (kind === 'case' ? 'cases' : 'questions') + '</button>' +
+    '<div class="case-head" style="margin-top:1.2rem"><span class="tag">' + esc(k.name.toUpperCase()) + '</span>' +
+    (x.style ? '<span class="tag">' + esc(x.style) + '</span>' : '') + (x.co ? '<span class="tag">' + esc(x.co) + '</span>' : '') +
+    (x.lvl ? '<span class="tag">' + esc(x.lvl) + '</span>' : '') + '<span class="tag">' + min + ' min</span></div>' +
+    '<h2>' + esc(title) + '</h2>' +
+    '<div class="prompt"><p class="say">' + (iv ? 'Read this aloud' : 'Your interviewer asks') + '</p>' + esc(kind === 'case' ? x.prompt : x.q) + '</div>' + src;
+
+  // case packet — shared with both people
+  if (kind === 'case') {
+    if (x.brief && x.brief.length) html += '<div class="brief panel"><h3>Case brief</h3><ul>' + li(x.brief) + '</ul></div>';
+    if (x.exhibits && x.exhibits.length) html += '<div class="panel"><h3>Data</h3>' + x.exhibits.map(exhibitHtml).join('') + '</div>';
+  }
+
+  html += '<div class="timer-row"><span class="clock" id="clock">0:00</span>' +
+    '<button class="btn" id="tstart">Start</button><button class="btn ghost" id="treset">Reset</button>' +
+    '<span class="tag">Target ' + min + ' min</span></div>' +
+    '<div class="share"><span>Send your partner this ' + (kind === 'case' ? 'case' : 'question') + ':</span>' +
+    '<button class="btn ghost" data-link="' + (iv ? 'candidate' : 'interviewer') + '">Copy link for the ' + (iv ? 'candidate' : 'interviewer') + '</button>' +
+    '<span id="copied" class="tag"></span></div>';
+
+  const follow = kind === 'case' ? x.follow : k.probes;
+  const guide =
+    (x.insight ? '<div class="insight"><b>Key insight.</b> ' + esc(x.insight) + '</div>' : '') +
+    '<div class="grid2">' +
+      '<div class="panel"><h3>Follow-ups to probe</h3><ul>' + li(follow) + '</ul></div>' +
+      (x.strong ? '<div class="panel"><h3>A strong answer covers</h3><ul>' + li(x.strong) + '</ul></div>' : '<div class="panel"><h3>Expected structure</h3><ol class="framework">' + li(k.framework) + '</ol></div>') +
+      (x.traps ? '<div class="panel"><h3>Watch for</h3><ul>' + li(x.traps) + '</ul></div>' : '') +
+    '</div>';
+
+  if (iv) {
+    html +=
+      '<div class="note"><b>Interviewer tips.</b> The candidate sees the same brief and data. Your job is to push: ask the follow-ups, challenge numbers, and keep time. Leave 5 minutes for feedback.</div>' +
+      guide +
+      (x.strong ? '<details><summary>Expected structure (' + esc(k.name) + ')</summary><ol class="framework">' + li(k.framework) + '</ol></details>' : '') +
+      '<div class="panel"><h3>Score it</h3><p class="tag" style="margin:0 0 .4rem">1 = weak · 2 = mixed · 3 = solid · 4 = strong</p>' +
+      '<table class="rubric"><tbody>' + k.rubric.map(([d, h], i) =>
+        '<tr><td><div class="d">' + esc(d) + '</div><div class="h">' + esc(h) + '</div></td>' +
+        '<td><div class="score" data-row="' + i + '">' + [1, 2, 3, 4].map((n) => '<button aria-pressed="false" aria-label="' + esc(d) + ' ' + n + '">' + n + '</button>').join('') + '</div></td></tr>').join('') +
+      '</tbody></table><p class="total" id="total">Total: <b>—</b></p></div>' +
+      '<div class="panel"><h3>Feedback notes</h3><textarea id="notes" placeholder="What they did well, what to work on, best moment, biggest miss…"></textarea></div>';
+  } else {
+    html +=
+      '<div class="note"><b>Before you start.</b> Read the brief' + (kind === 'case' && x.exhibits && x.exhibits.length ? ' and the data' : '') + ', take a minute to structure, then think out loud. Expect follow-ups that push on your numbers and choices.</div>' +
+      '<details><summary>Framework hint — ' + esc(k.name) + '</summary><ol class="framework">' + li(k.framework) + '</ol></details>' +
+      '<div class="panel"><h3>Scratchpad</h3><textarea id="notes" placeholder="Structure, assumptions, numbers…"></textarea></div>' +
+      '<div class="panel"><button class="btn" id="finish">I\'m done — show the debrief</button></div>' +
+      '<div id="debrief" hidden>' + guide +
+        '<div class="panel"><h3>How you\'re scored</h3><ul>' + k.rubric.map(([d, h]) => '<li><b>' + esc(d) + '</b> — ' + esc(h) + '</li>').join('') + '</ul></div>' +
+      '</div>';
+  }
+
+  const el = $('#case');
+  el.innerHTML = html;
+  el.hidden = false;
+  $('#list').hidden = true; $('#more').hidden = true; $('#rcount').hidden = true;
+
+  $('#backlist').addEventListener('click', () => { closeItem(); renderList(); window.scrollTo({ top: $('#picker').offsetTop - 20, behavior: 'smooth' }); });
+  $('#tstart').addEventListener('click', toggleTimer);
+  $('#treset').addEventListener('click', () => stopTimer(true));
+  el.querySelector('[data-link]').addEventListener('click', (e) => copyLink(e.currentTarget.dataset.link));
+
+  const notesKey = 'notes.' + role + '.' + x.id;
+  const ta = $('#notes');
+  ta.value = store.get(notesKey, '');
+  ta.addEventListener('input', () => store.set(notesKey, ta.value));
+
+  if (iv) {
+    const scores = {};
+    el.querySelectorAll('.score').forEach((row) => row.querySelectorAll('button').forEach((b, i) => b.addEventListener('click', () => {
+      row.querySelectorAll('button').forEach((y, j) => y.setAttribute('aria-pressed', String(i === j)));
+      scores[row.dataset.row] = i + 1;
+      const vals = Object.values(scores);
+      const sum = vals.reduce((a, v) => a + v, 0);
+      const avg = sum / vals.length;
+      const verdict = vals.length < k.rubric.length ? '' : avg >= 3.4 ? ' — strong hire signal' : avg >= 2.8 ? ' — lean hire' : avg >= 2.2 ? ' — lean no hire' : ' — needs work';
+      $('#total').innerHTML = 'Total: <b>' + sum + ' / ' + k.rubric.length * 4 + '</b>' + esc(verdict);
+      markDone(x.id);
+    })));
+  } else {
+    $('#finish').addEventListener('click', () => {
+      $('#debrief').hidden = false; $('#finish').hidden = true; stopTimer(false); markDone(x.id);
+      $('#debrief').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
+  current.min = min;
+  renderClock();
+  syncHash();
+  el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function markDone(id) { done.add(id); store.set('done', [...done]); }
+
+/* ---------- timer ---------- */
+function toggleTimer() {
+  if (timer.id) { stopTimer(false); return; }
+  timer.start = Date.now() - timer.elapsed;
+  timer.id = setInterval(renderClock, 500);
+  $('#tstart').textContent = 'Pause';
+}
+function stopTimer(reset) {
+  if (timer.id) { clearInterval(timer.id); timer.id = null; timer.elapsed = Date.now() - timer.start; }
+  if (reset) timer.elapsed = 0;
+  const b = $('#tstart'); if (b) b.textContent = timer.elapsed ? 'Resume' : 'Start';
+  renderClock();
+}
+function renderClock() {
+  const el = $('#clock'); if (!el) return;
+  const ms = timer.id ? Date.now() - timer.start : timer.elapsed;
+  const s = Math.floor(ms / 1000);
+  el.textContent = Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+  el.classList.toggle('over', !!current && s >= current.min * 60);
+}
+
+/* ---------- links ---------- */
+function syncHash() {
+  const parts = [];
+  if (role) parts.push('role=' + role);
+  if (current) parts.push((current.kind === 'case' ? 'case=' : 'q=') + current.item.id);
+  history.replaceState(null, '', parts.length ? '#' + parts.join('&') : location.pathname);
+}
+function copyLink(forRole) {
+  const key = current.kind === 'case' ? 'case=' : 'q=';
+  const url = location.origin + location.pathname + '#role=' + forRole + '&' + key + current.item.id;
+  const ok = () => { $('#copied').textContent = 'Copied!'; setTimeout(() => { const c = $('#copied'); if (c) c.textContent = ''; }, 2000); };
+  if (navigator.clipboard) navigator.clipboard.writeText(url).then(ok, () => prompt('Copy this link:', url));
+  else prompt('Copy this link:', url);
+}
+
+/* ---------- sources ---------- */
+(function renderSources() {
+  const seen = new Map();
+  const add = (s) => { if (s && s.url && !seen.has(s.url)) seen.set(s.url, s.name); };
+  [{ name: 'Exponent — top PM interview questions', url: 'https://www.tryexponent.com/blog/top-product-manager-interview-questions' },
+   { name: 'Exponent — execution rubric', url: 'https://www.tryexponent.com/courses/pm/execution/execution-rubric' },
+   { name: 'IGotAnOffer — PM interview grading rubrics', url: 'https://igotanoffer.com/en/advice/pm-interview-grading-rubrics' },
+   { name: 'Lenny\'s Newsletter — mastering product sense interviews', url: 'https://www.lennysnewsletter.com/p/the-definitive-guide-to-mastering' },
+   { name: 'Aakash Gupta — cracking the execution interview', url: 'https://www.news.aakashg.com/p/crack-the-product-execution-interview' }].forEach(add);
+  Object.values(SOURCES).forEach(add);
+  (window.PM_CASES_A_SOURCES || []).forEach(add);
+  (window.PM_CASES_B_SOURCES || []).forEach(add);
+  $('#sources').innerHTML = [...seen].map(([url, name]) => '<li><a href="' + esc(url) + '" rel="noopener" target="_blank">' + esc(name) + '</a></li>').join('');
+})();
+
+/* ---------- boot ---------- */
+renderCompanies();
+renderCats();
+// Also runs on hashchange, so a shared link pasted into an open tab works (replaceState doesn't fire it).
+function boot() {
+  const p = new URLSearchParams(location.hash.slice(1));
+  const r = p.get('role');
+  const cid = p.get('case'), qid = p.get('q');
+  if (cid && CASES.some((c) => c.id === cid)) current = { kind: 'case', item: CASES.find((c) => c.id === cid) };
+  else if (qid && BANK.some((q) => q.id === qid)) current = { kind: 'bank', item: BANK.find((q) => q.id === qid) };
+  if (r === 'interviewer' || r === 'candidate') setRole(r);
+}
+boot();
+window.addEventListener('hashchange', boot);
+</script>
+</body>
+</html>
