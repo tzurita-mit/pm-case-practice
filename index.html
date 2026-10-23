@@ -275,6 +275,25 @@
   .linkbtn:hover { color: var(--accent); }
   .linkbtn .mono { color: var(--text-3); margin-right: 4px; }
 
+  /* study */
+  .study-h { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 600; margin: 22px 0 10px; }
+  .study-h svg.i { color: var(--accent); }
+  #study > .study-h:first-child { margin-top: 6px; }
+  .ticket .sum { color: var(--text-2); font-size: 13px; line-height: 1.5; }
+  .gloss { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
+  .term { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; box-shadow: var(--shadow); }
+  .term-h { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .term-h b { font-weight: 600; }
+  .term p { margin: 6px 0 0; color: var(--text-2); font-size: 13px; }
+  .term p.muted { color: var(--text-3); }
+  .steps-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+  .step-t { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 15px; }
+  .step-t .num { width: 24px; height: 24px; border-radius: 7px; background: var(--accent); color: var(--on-accent); display: grid; place-items: center; font-size: 12px; flex: none; }
+  .step-card p { margin: 8px 0 0; color: var(--text-2); }
+  .step-card ul { margin: 8px 0 0; }
+  .say-q { display: flex; gap: 8px; margin: 10px 0 0; padding: 9px 12px; border-radius: 8px; background: var(--accent-soft); color: var(--text); font-style: italic; font-size: 13px; }
+  .say-q svg.i { color: var(--accent); margin-top: 2px; }
+
   /* footer */
   footer { margin: 56px 0 40px; padding-top: 20px; border-top: 1px solid var(--border); color: var(--text-3); font-size: 12.5px; }
   footer details summary { cursor: pointer; color: var(--text-2); font-weight: 500; }
@@ -306,6 +325,7 @@
       <button role="tab" data-tab="cases" aria-selected="true">Cases <span class="count" id="n-cases"></span></button>
       <button role="tab" data-tab="bank" aria-selected="false"><span class="lg">Question bank</span><span class="sm">Bank</span> <span class="count" id="n-bank"></span></button>
       <button role="tab" data-tab="videos" aria-selected="false"><span class="lg">Watch a real mock</span><span class="sm">Mocks</span> <span class="count" id="n-videos"></span></button>
+      <button role="tab" data-tab="study" aria-selected="false">Study</button>
     </nav>
     <span class="spacer"></span>
     <span class="progress-chip" id="progress"></span>
@@ -336,6 +356,7 @@
     <div class="labels" id="cats" role="group" aria-label="Category"></div>
     <p class="result-count" id="count-line" hidden></p>
     <ul class="grid" id="list"></ul>
+    <div id="study" hidden></div>
     <div class="more"><button class="btn" id="more" hidden>Show more</button></div>
   </section>
 
@@ -353,6 +374,7 @@
 <script src="pm/bank.js"></script>
 <script src="pm/related.js"></script>
 <script src="pm/videos.js"></script>
+<script src="pm/study.js"></script>
 <script>
 /* ---------- frameworks, rubrics and generic probes per category ---------- */
 const CATS = {
@@ -426,11 +448,14 @@ const hashId = (s) => { let h = 5381; for (let i = 0; i < s.length; i++) h = ((h
 const BANK = (window.PM_BANK || []).filter((q) => CATS[q.cat]).map((q) => Object.assign({ id: hashId(q.q) }, q));
 const SOURCES = window.PM_SOURCES || {};
 const VIDEOS = (window.PM_VIDEOS || []).filter((v) => CATS[v.cat]);
+const STUDY = Object.assign({ guides: [], concepts: [], skills: [], sources: [] }, window.PM_STUDY);
+const GUIDES = STUDY.guides.filter((g) => CATS[g.cat]).map((g) => Object.assign({ id: g.cat }, g));
+Object.keys(CATS).forEach((k) => { CATS[k].key = k; });
 // Each library tab holds one kind of item.
-const KIND = { cases: 'case', bank: 'bank', videos: 'video' };
-const TAB_OF = { case: 'cases', bank: 'bank', video: 'videos' };
-const LIST_OF = { case: CASES, bank: BANK, video: VIDEOS };
-const HASH_KEY = { case: 'case', bank: 'q', video: 'v' };
+const KIND = { cases: 'case', bank: 'bank', videos: 'video', study: 'guide' };
+const TAB_OF = { case: 'cases', bank: 'bank', video: 'videos', guide: 'study' };
+const LIST_OF = { case: CASES, bank: BANK, video: VIDEOS, guide: GUIDES };
+const HASH_KEY = { case: 'case', bank: 'q', video: 'v', guide: 's' };
 
 /* ---------- provenance ---------- */
 // Full cases are written for this app, so instead of inventing a source we show the
@@ -525,7 +550,7 @@ const card = (ic, title, body, right) => '<div class="card"><div class="card-h">
 
 /* ---------- header stats ---------- */
 function renderProgress() {
-  const all = [...CASES, ...BANK, ...VIDEOS];
+  const all = [...CASES, ...BANK, ...VIDEOS, ...GUIDES];
   const total = all.length;
   const n = all.filter((x) => done.has(x.id)).length;
   const pct = total ? n / total : 0;
@@ -568,13 +593,15 @@ $('#home').addEventListener('click', () => { role = null; setTab('cases'); windo
 const TAB_TEXT = {
   cases: ['Cases', 'Search cases, companies, industries…'],
   bank: ['Question bank', 'Search questions, companies, sources…'],
-  videos: ['Watch a real mock', 'Search videos, channels, companies…']
+  videos: ['Watch a real mock', 'Search videos, channels, companies…'],
+  study: ['Study', 'Search frameworks, concepts, skills…']
 };
 // Sync the nav and filter controls to `tab` (without touching the list).
 function applyTab() {
   document.querySelectorAll('.nav button').forEach((x) => x.setAttribute('aria-selected', String(x.dataset.tab === tab)));
-  $('#co').hidden = tab === 'cases';
-  $('#lvl').hidden = tab === 'videos';
+  $('#co').hidden = tab === 'cases' || tab === 'study';
+  $('#lvl').hidden = tab === 'videos' || tab === 'study';
+  $('#random').hidden = tab === 'study';
   $('#list-title').textContent = TAB_TEXT[tab][0];
   $('#search').placeholder = TAB_TEXT[tab][1];
   renderCompanies(); renderCats();
@@ -587,9 +614,11 @@ function setTab(t) {
 function pool() { return LIST_OF[KIND[tab]]; }
 function renderCats() {
   const counts = {};
-  pool().forEach((x) => { counts[x.cat] = (counts[x.cat] || 0) + 1; });
+  // On Study the chips filter the glossary, so they count concepts.
+  const src = tab === 'study' ? STUDY.concepts : pool();
+  src.forEach((x) => { counts[x.cat] = (counts[x.cat] || 0) + 1; });
   if (cat !== 'all' && !counts[cat]) cat = 'all';
-  const chips = [['all', 'All', pool().length]].concat(Object.keys(CATS).filter((k) => counts[k]).map((k) => [k, CATS[k].name, counts[k]]));
+  const chips = [['all', 'All', src.length]].concat(Object.keys(CATS).filter((k) => counts[k]).map((k) => [k, CATS[k].name, counts[k]]));
   $('#cats').innerHTML = chips.map(([k, n, c]) => '<button class="label-chip" data-cat="' + k + '" aria-pressed="' + (k === cat) + '">' +
     (k === 'all' ? '' : '<span class="dot"></span>') + esc(n) + '<span class="c">' + c + '</span></button>').join('');
   $('#cats').querySelectorAll('.label-chip').forEach((c) => c.addEventListener('click', () => { cat = c.dataset.cat; shown = PAGE; renderCats(); renderList(); }));
@@ -621,6 +650,9 @@ function filtered() {
 }
 function renderList() {
   $('#picker').hidden = false;
+  $('#study').hidden = tab !== 'study';
+  $('#list').hidden = tab === 'study';
+  if (tab === 'study') { $('#more').hidden = true; return renderStudy(); }
   const items = filtered();
   $('#rcount').textContent = items.length + ' ' + ({ cases: 'case', bank: 'question', videos: 'video' })[tab] + (items.length === 1 ? '' : 's');
   const list = $('#list');
@@ -658,6 +690,83 @@ $('#random').addEventListener('click', () => {
   const fresh = items.filter((x) => !done.has(x.id));
   const from = fresh.length ? fresh : items;
   pickNew(KIND[tab], from[Math.floor(Math.random() * from.length)].id);
+});
+
+/* ---------- study ---------- */
+function renderStudy() {
+  const term = $('#search').value.trim().toLowerCase();
+  const has = (...xs) => !term || xs.join(' ').toLowerCase().includes(term);
+  const guides = GUIDES.filter((g) => (cat === 'all' || g.cat === cat) && has(g.title, g.summary, g.framework.name, (g.framework.steps || []).map((s) => s.t + ' ' + s.d).join(' ')));
+  const skills = STUDY.skills.filter((s) => cat === 'all' && has(s.title, (s.points || []).join(' ')));
+  const concepts = STUDY.concepts.filter((c) => (cat === 'all' || c.cat === cat) && has(c.term, c.def, c.example));
+  $('#rcount').textContent = guides.length + ' guide' + (guides.length === 1 ? '' : 's') + ' · ' + concepts.length + ' concept' + (concepts.length === 1 ? '' : 's');
+  const status = (g) => done.has(g.id) ? '<span class="status">' + icon('check') + 'Read</span>' : '';
+  $('#study').innerHTML =
+    (guides.length ? '<h3 class="study-h">' + icon('list') + 'Frameworks by interview type</h3><ul class="grid">' + guides.map((g) =>
+      '<li><button class="ticket" data-guide="' + esc(g.id) + '"><span class="row">' + catTag(g.cat) + status(g) + '</span>' +
+      '<span class="title">' + esc(g.title) + '</span><span class="sum">' + esc(g.summary) + '</span>' +
+      '<span class="meta"><span>' + icon('list') + esc(g.framework.name) + '</span><span>' + (g.framework.steps || []).length + ' steps</span></span></button></li>').join('') + '</ul>' : '') +
+    (skills.length ? '<h3 class="study-h">' + icon('star') + 'Interview skills</h3><div class="two">' + skills.map((s) =>
+      card('check', s.title, '<ul>' + li(s.points) + '</ul>')).join('') + '</div>' : '') +
+    (concepts.length ? '<h3 class="study-h">' + icon('doc') + 'Key concepts</h3><div class="gloss">' + concepts.map((c) =>
+      '<div class="term"><div class="term-h"><b>' + esc(c.term) + '</b>' + catTag(c.cat) + '</div><p>' + esc(c.def) + '</p>' +
+      (c.example ? '<p class="muted">e.g. ' + esc(c.example) + '</p>' : '') + '</div>').join('') + '</div>' : '') +
+    (!guides.length && !concepts.length && !skills.length ? '<p class="muted">Nothing matches your search.</p>' : '');
+}
+
+function openGuide(g) {
+  current = { kind: 'guide', item: g };
+  stopTimer(true);
+  const k = CATS[g.cat];
+  const f = g.framework || { steps: [] };
+  const cases = CASES.filter((c) => c.cat === g.cat);
+  const vids = VIDEOS.filter((v) => v.cat === g.cat);
+  const qs = BANK.filter((q) => q.cat === g.cat);
+  const concepts = STUDY.concepts.filter((c) => c.cat === g.cat);
+  const el = $('#case');
+  $('#picker').hidden = true;
+  el.hidden = false;
+  el.innerHTML =
+    '<nav class="crumbs"><button id="backlist">Study</button>' + icon('chev') + '<span>' + esc(k.name) + '</span></nav>' +
+    '<h1 class="detail-title">' + esc(g.title) + '</h1>' +
+    '<div class="props"><span class="prop" data-cat="' + g.cat + '"><span class="dot"></span>' + esc(k.name) + '</span>' +
+      '<span class="prop">' + icon('list') + '<span class="k">Framework</span>' + esc(f.name) + '</span>' +
+      (f.origin ? '<span class="prop"><span class="k">Origin</span>' + esc(f.origin) + '</span>' : '') + '</div>' +
+    '<div class="layout"><div class="main">' +
+      '<div class="card prompt-card"><div class="card-b"><p class="say">In a nutshell</p><div class="text" style="font-size:15.5px;font-weight:400">' + esc(g.summary) + '</div></div></div>' +
+      '<div class="two">' + card('chat', 'What it sounds like', '<ul>' + li(g.looksLike) + '</ul>') + card('star', 'What interviewers look for', '<ul>' + li(g.evaluates) + '</ul>') + '</div>' +
+      '<h3 class="study-h">' + icon('list') + 'The framework: ' + esc(f.name) + '</h3>' +
+      '<ol class="steps-list">' + (f.steps || []).map((s, i) =>
+        '<li class="card step-card"><div class="card-b"><div class="step-t"><span class="num">' + (i + 1) + '</span>' + esc(s.t) + '</div><p>' + esc(s.d) + '</p>' +
+        (s.tips && s.tips.length ? '<ul>' + li(s.tips) + '</ul>' : '') +
+        (s.say ? '<blockquote class="say-q">' + icon('mic') + '<span>“' + esc(s.say) + '”</span></blockquote>' : '') + '</div></li>').join('') + '</ol>' +
+      (g.timing && g.timing.length ? '<div class="card"><div class="card-h">' + icon('clock') + 'How to spend your time</div><div class="sheet"><table><tbody>' +
+        g.timing.map(([a, b]) => '<tr><td>' + esc(a) + '</td><td>' + esc(b) + '</td></tr>').join('') + '</tbody></table></div></div>' : '') +
+      (g.example ? card('bulb', 'Worked example', '<p style="margin:0 0 8px;font-weight:600;color:var(--text)">' + esc(g.example.q) + '</p><ol>' + li(g.example.outline) + '</ol>') : '') +
+      '<div class="two">' + card('alert', 'Common mistakes', '<ul>' + li(g.mistakes) + '</ul>') + card('check', 'Pro tips', '<ul>' + li(g.tips) + '</ul>') + '</div>' +
+      (g.alternatives && g.alternatives.length ? card('swap', 'Other frameworks', '<ul>' + g.alternatives.map((a) => '<li><b>' + esc(a.name) + '</b> — ' + esc(a.d) + '</li>').join('') + '</ul>') : '') +
+    '</div><aside class="aside">' +
+      card('flag', 'Practise it',
+        '<div class="btn-row" style="flex-direction:column;align-items:stretch">' +
+          '<button class="btn sm" data-goto="cases">' + icon('doc') + cases.length + ' full cases</button>' +
+          '<button class="btn sm" data-goto="bank">' + icon('chat') + qs.length + ' bank questions</button>' +
+          '<button class="btn sm" data-goto="videos">' + icon('video') + vids.length + ' mock videos</button></div>' +
+        (cases.length ? '<p class="muted" style="margin:12px 0 6px">Start with:</p><ul class="plain">' + cases.slice(0, 3).map((c) =>
+          '<li><button class="linkbtn" data-case="' + esc(c.id) + '"><span class="mono">' + c.key + '</span> ' + esc(c.title) + '</button></li>').join('') + '</ul>' : '')) +
+      (concepts.length ? card('doc', 'Key concepts', '<ul class="plain">' + concepts.map((c) => '<li><b>' + esc(c.term) + '</b><br><span class="muted">' + esc(c.def) + '</span></li>').join('') + '</ul>') : '') +
+      (g.sources && g.sources.length ? card('link', 'Sources', '<ul>' + g.sources.map((s) => '<li><a href="' + esc(s.url) + '" rel="noopener" target="_blank">' + esc(s.name) + '</a></li>').join('') + '</ul>') : '') +
+    '</aside></div>';
+  $('#backlist').addEventListener('click', backToList);
+  el.querySelectorAll('[data-case]').forEach((b) => b.addEventListener('click', () => pickNew('case', b.dataset.case)));
+  el.querySelectorAll('[data-goto]').forEach((b) => b.addEventListener('click', () => { const c = g.cat; role = null; setTab(b.dataset.goto); cat = c; renderCats(); renderList(); window.scrollTo({ top: $('#list-title').offsetTop - 80 }); }));
+  markDone(g.id);
+  syncHash();
+  window.scrollTo({ top: 0 });
+}
+// Guide links appear in the Study list and in every case's framework card.
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-guide]');
+  if (b && GUIDES.some((g) => g.id === b.dataset.guide)) { e.preventDefault(); pickNew('guide', b.dataset.guide); }
 });
 
 /* ---------- detail view ---------- */
@@ -707,13 +816,16 @@ function openVideo(x) {
   window.scrollTo({ top: 0 });
 }
 const frameworkCard = (k, open) => '<details class="card"' + (open ? ' open' : '') + '><summary class="card-h">' + icon('list') + 'Framework · ' + esc(k.name) + icon('chev', 'chev') + '</summary>' +
-  '<div class="card-b"><ol class="framework">' + li(k.framework) + '</ol></div></details>';
+  '<div class="card-b"><ol class="framework">' + li(k.framework) + '</ol>' +
+  (GUIDES.some((g) => g.id === k.key) ? '<button class="btn sm" data-guide="' + k.key + '" style="margin-top:8px">' + icon('doc') + 'Read the full guide</button>' : '') +
+  '</div></details>';
 
 function openItem(kind, id, resetTimer = true) {
   const x = LIST_OF[kind].find((c) => c.id === id);
   if (!x) return;
   if (TAB_OF[kind] !== tab) { tab = TAB_OF[kind]; applyTab(); }
   if (kind === 'video') return openVideo(x);
+  if (kind === 'guide') return openGuide(x);
   current = { kind, item: x };
   if (resetTimer) stopTimer(true);
   const k = CATS[x.cat];
@@ -900,6 +1012,7 @@ function copyLink(forRole) {
   Object.values(SOURCES).forEach(add);
   (window.PM_CASES_A_SOURCES || []).forEach(add);
   (window.PM_CASES_B_SOURCES || []).forEach(add);
+  STUDY.sources.forEach(add);
   $('#n-sources').textContent = seen.size;
   $('#sources').innerHTML = [...seen].map(([url, name]) => '<li><a href="' + esc(url) + '" rel="noopener" target="_blank">' + esc(name) + '</a></li>').join('');
 })();
@@ -913,7 +1026,7 @@ function boot() {
   const p = new URLSearchParams(location.hash.slice(1));
   const r = p.get('role');
   current = null;
-  for (const kind of ['case', 'bank', 'video']) {
+  for (const kind of Object.keys(HASH_KEY)) {
     const id = p.get(HASH_KEY[kind]);
     const item = id && LIST_OF[kind].find((x) => x.id === id);
     if (item) { current = { kind, item }; break; }
