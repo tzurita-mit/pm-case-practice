@@ -275,6 +275,22 @@
   .linkbtn:hover { color: var(--accent); }
   .linkbtn .mono { color: var(--text-3); margin-right: 4px; }
 
+  /* full interview */
+  .hero-cta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 16px; }
+  .loop-stages { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+  .loop-stage { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; box-shadow: var(--shadow); }
+  .loop-stage .n { width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center; font-weight: 600; font-size: 12.5px; background: var(--accent-soft); color: var(--accent); }
+  .loop-stage .q { font-weight: 500; }
+  .loop-stage .sub { display: flex; gap: 8px; align-items: center; margin-top: 4px; }
+  .loop-controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 14px 0; }
+  .stepper { position: sticky; top: 56px; z-index: 10; background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(8px); padding: 12px 0; margin-top: 8px; border-bottom: 1px solid var(--border); display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .steps-row { display: flex; gap: 4px; flex: 1; min-width: 220px; }
+  .steps-row button { flex: 1; border: 1px solid var(--border); background: var(--surface); border-radius: 8px; padding: 5px 8px; font-size: 12px; color: var(--text-3); text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .steps-row button.past { color: var(--text-2); border-color: color-mix(in srgb, var(--accent) 30%, transparent); }
+  .steps-row button[aria-current="step"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
+  .stepper .label { font-weight: 600; font-size: 13px; white-space: nowrap; }
+  .summary td.num { font-variant-numeric: tabular-nums; }
+
   /* done toggle */
   .done-btn { cursor: pointer; font-weight: 500; }
   .done-btn:hover { border-color: var(--good); color: var(--good); }
@@ -331,6 +347,7 @@
       <button role="tab" data-tab="bank" aria-selected="false"><span class="lg">Question bank</span><span class="sm">Bank</span> <span class="count" id="n-bank"></span></button>
       <button role="tab" data-tab="videos" aria-selected="false"><span class="lg">Watch a real mock</span><span class="sm">Mocks</span> <span class="count" id="n-videos"></span></button>
       <button role="tab" data-tab="study" aria-selected="false">Study</button>
+      <button role="tab" data-tab="loop" aria-selected="false"><span class="lg">Full interview</span><span class="sm">Full</span></button>
     </nav>
     <span class="spacer"></span>
     <span class="progress-chip" id="progress"></span>
@@ -349,6 +366,7 @@
         <div class="step"><span class="n">03</span><div><b>Run, score, debrief</b><span>Timebox it, score the rubric, review the key insight.</span></div></div>
       </div>
       <div class="kpis" id="kpis"></div>
+      <div class="hero-cta"><button class="btn primary" id="start-loop">Start a full interview</button><span class="muted">3 behavioral questions + 1 case, about 55 minutes</span></div>
     </div>
 
     <div class="section-h"><h2 id="list-title">Cases</h2><span class="muted" id="rcount"></span></div>
@@ -362,6 +380,7 @@
     <p class="result-count" id="count-line" hidden></p>
     <ul class="grid" id="list"></ul>
     <div id="study" hidden></div>
+    <div id="loopsetup" hidden></div>
     <div class="more"><button class="btn" id="more" hidden>Show more</button></div>
   </section>
 
@@ -512,6 +531,7 @@ const store = {
 const PAGE = 30;
 let role = null, tab = 'cases', cat = 'all', shown = PAGE;
 let current = null; // { kind: 'case' | 'bank', item }
+let loop = null;    // full interview in progress: { items: [{ kind, id }], step, scores: [] }
 let timer = { start: null, elapsed: 0, id: null };
 const done = new Set(store.get('done', []));
 
@@ -587,7 +607,8 @@ function roleChooser() {
       '<span class="cta">Take the case ' + icon('arrow') + '</span></button>' +
   '</div></div>';
 }
-function pickNew(kind, id) { role = null; openItem(kind, id); }
+// Opening an item from a list or link leaves any full interview in progress.
+function pickNew(kind, id) { role = null; loop = null; openItem(kind, id); }
 
 /* ---------- tabs + filters ---------- */
 $('#n-cases').textContent = CASES.length;
@@ -599,11 +620,16 @@ const TAB_TEXT = {
   cases: ['Cases', 'Search cases, companies, industries…'],
   bank: ['Question bank', 'Search questions, companies, sources…'],
   videos: ['Watch a real mock', 'Search videos, channels, companies…'],
-  study: ['Study', 'Search frameworks, concepts, skills…']
+  study: ['Study', 'Search frameworks, concepts, skills…'],
+  loop: ['Full interview', '']
 };
 // Sync the nav and filter controls to `tab` (without touching the list).
 function applyTab() {
   document.querySelectorAll('.nav button').forEach((x) => x.setAttribute('aria-selected', String(x.dataset.tab === tab)));
+  // The full-interview tab has its own setup panel instead of the shared filters.
+  $('.filterbar').hidden = $('#cats').hidden = tab === 'loop';
+  $('#list-title').textContent = TAB_TEXT[tab][0];
+  if (tab === 'loop') return;
   $('#co').hidden = tab === 'cases' || tab === 'study';
   $('#lvl').hidden = tab === 'videos' || tab === 'study';
   $('#random').hidden = tab === 'study';
@@ -656,8 +682,10 @@ function filtered() {
 function renderList() {
   $('#picker').hidden = false;
   $('#study').hidden = tab !== 'study';
-  $('#list').hidden = tab === 'study';
+  $('#loopsetup').hidden = tab !== 'loop';
+  $('#list').hidden = tab === 'study' || tab === 'loop';
   if (tab === 'study') { $('#more').hidden = true; return renderStudy(); }
+  if (tab === 'loop') { $('#more').hidden = true; return renderLoopSetup(); }
   const items = filtered();
   $('#rcount').textContent = items.length + ' ' + ({ cases: 'case', bank: 'question', videos: 'video' })[tab] + (items.length === 1 ? '' : 's');
   const list = $('#list');
@@ -773,6 +801,158 @@ document.addEventListener('click', (e) => {
   if (b && GUIDES.some((g) => g.id === b.dataset.guide)) { e.preventDefault(); pickNew('guide', b.dataset.guide); }
 });
 
+/* ---------- full interview ---------- */
+// A full interview is 3 behavioral bank questions followed by 1 full case, run in order.
+const LOOP_SHAPE = ['Behavioral', 'Behavioral', 'Behavioral', 'Case'];
+let loopDraft = null, loopCat = '', loopLvl = '';
+const pickRandom = (list, n) => {
+  const fresh = list.filter((x) => !done.has(x.id));
+  const src = (fresh.length >= n ? fresh : list).slice();
+  const out = [];
+  while (out.length < n && src.length) out.push(src.splice(Math.floor(Math.random() * src.length), 1)[0]);
+  return out;
+};
+const loopCases = () => CASES.filter((c) => c.cat !== 'behavioral' && (!loopCat || c.cat === loopCat) && (!loopLvl || c.lvl === loopLvl));
+function drawLoop() {
+  const beh = pickRandom(BANK.filter((q) => q.cat === 'behavioral'), 3);
+  const cs = pickRandom(loopCases(), 1);
+  loopDraft = beh.map((q) => ({ kind: 'bank', id: q.id })).concat(cs.map((c) => ({ kind: 'case', id: c.id })));
+}
+const loopItem = (it) => LIST_OF[it.kind].find((x) => x.id === it.id);
+const itemMin = (x) => x.min || ({ estimate: 15, behavioral: 10 })[x.cat] || 25;
+const itemTitle = (x) => x.title || x.q;
+function parseLoop(s) {
+  if (!s) return null;
+  const kindOf = Object.fromEntries(Object.entries(HASH_KEY).map(([k, v]) => [v, k]));
+  const items = s.split(',').map((t) => { const [h, id] = t.split(':'); return { kind: kindOf[h], id }; });
+  return items.length && items.every((it) => LIST_OF[it.kind] && loopItem(it)) ? items : null;
+}
+
+function stageList(items) {
+  return '<ol class="loop-stages">' + items.map((it, i) => {
+    const x = loopItem(it);
+    return '<li class="loop-stage"><span class="n">' + (i + 1) + '</span><div><div class="q">' + esc(itemTitle(x)) + '</div>' +
+      '<div class="sub">' + catTag(x.cat) + (x.lvl ? prio(x.lvl) : '') + (x.co && x.co !== 'General' ? '<span class="co">' + esc(x.co) + '</span>' : '') + '</div></div>' +
+      '<span class="muted">' + icon('clock') + ' ' + itemMin(x) + ' min</span></li>';
+  }).join('') + '</ol>';
+}
+const loopMinutes = (items) => items.reduce((a, it) => a + itemMin(loopItem(it)), 0);
+
+function renderLoopSetup() {
+  if (!loopDraft) drawLoop();
+  const caseCats = Object.keys(CATS).filter((k) => k !== 'behavioral' && CASES.some((c) => c.cat === k));
+  $('#rcount').textContent = '';
+  $('#loopsetup').innerHTML =
+    '<p class="muted" style="margin:0 0 4px">Run a realistic interview with a partner: ' + LOOP_SHAPE.length + ' questions in order, about ' + loopMinutes(loopDraft) + ' minutes. ' +
+    'Behavioral questions come from the question bank; the case is a full case with data. Each of you picks a side, and the interviewer scores every question.</p>' +
+    '<div class="loop-controls">' +
+      '<select class="select" id="loop-cat" aria-label="Case type"><option value="">Any case type</option>' + caseCats.map((k) => '<option value="' + k + '"' + (k === loopCat ? ' selected' : '') + '>' + esc(CATS[k].name) + '</option>').join('') + '</select>' +
+      '<select class="select" id="loop-lvl" aria-label="Case difficulty"><option value="">Any difficulty</option>' + ['Easy', 'Medium', 'Hard'].map((l) => '<option' + (l === loopLvl ? ' selected' : '') + '>' + l + '</option>').join('') + '</select>' +
+      '<button class="btn" id="loop-shuffle">' + icon('swap') + 'Shuffle questions</button>' +
+    '</div>' +
+    (loopDraft.length === LOOP_SHAPE.length ? stageList(loopDraft) : '<p class="muted">No cases match those filters — try another case type or difficulty.</p>') +
+    '<div class="loop-controls"><button class="btn primary" id="loop-start"' + (loopDraft.length === LOOP_SHAPE.length ? '' : ' disabled') + '>' + icon('arrow') + 'Start this interview</button></div>';
+  const redraw = () => { loopCat = $('#loop-cat').value; loopLvl = $('#loop-lvl').value; drawLoop(); renderLoopSetup(); };
+  $('#loop-cat').addEventListener('change', redraw);
+  $('#loop-lvl').addEventListener('change', redraw);
+  $('#loop-shuffle').addEventListener('click', redraw);
+  $('#loop-start').addEventListener('click', () => { loop = { items: loopDraft, step: 0, scores: [] }; loopDraft = null; role = null; showLoopStage(); });
+}
+$('#start-loop').addEventListener('click', () => { setTab('loop'); window.scrollTo({ top: $('#list-title').offsetTop - 80, behavior: 'smooth' }); });
+
+// Shows the side chooser (no role yet), the current question, or the summary after the last one.
+function showLoopStage() {
+  stopTimer(true);
+  if (tab !== 'loop') { tab = 'loop'; applyTab(); }
+  if (!role) return showLoopChooser();
+  if (loop.step >= loop.items.length) return showLoopSummary();
+  const it = loop.items[loop.step];
+  openItem(it.kind, it.id);
+}
+function showLoopChooser() {
+  current = null;
+  const el = $('#case');
+  $('#picker').hidden = true;
+  el.hidden = false;
+  el.innerHTML =
+    '<nav class="crumbs"><button id="loop-exit">Full interview</button>' + icon('chev') + '<span>Choose your side</span></nav>' +
+    '<h1 class="detail-title">Full interview · ' + loop.items.length + ' questions</h1>' +
+    '<div class="props"><span class="prop">' + icon('clock') + 'About ' + loopMinutes(loop.items) + ' min</span><span class="prop">3 behavioral + 1 case</span></div>' +
+    '<div style="margin-top:18px">' + stageList(loop.items) + '</div>' + roleChooser();
+  $('#loop-exit').addEventListener('click', exitLoop);
+  el.querySelectorAll('.role').forEach((b) => b.addEventListener('click', () => { role = b.dataset.role; showLoopStage(); }));
+  syncHash();
+  window.scrollTo({ top: 0 });
+}
+function exitLoop() { loop = null; role = null; closeItem(); tab = 'loop'; applyTab(); renderList(); }
+
+// Keep the interviewer's score for the current question before moving on.
+function captureScore() {
+  const t = $('#total'), v = $('#verdict');
+  if (role === 'interviewer' && t && !t.textContent.startsWith('—')) loop.scores[loop.step] = { total: t.textContent, verdict: v ? v.textContent : '' };
+}
+function goStep(n) { captureScore(); loop.step = n; showLoopStage(); }
+
+// Replace the item page's breadcrumb with the interview stepper and next/previous controls.
+function decorateLoop() {
+  const el = $('#case');
+  const crumbs = el.querySelector('.crumbs');
+  const last = loop.step === loop.items.length - 1;
+  const bar = document.createElement('div');
+  bar.className = 'stepper';
+  bar.innerHTML =
+    '<span class="label">Question ' + (loop.step + 1) + ' of ' + loop.items.length + '</span>' +
+    '<div class="steps-row">' + loop.items.map((it, i) =>
+      '<button data-step="' + i + '"' + (i === loop.step ? ' aria-current="step"' : '') + ' class="' + (i < loop.step ? 'past' : '') + '">' + (i + 1) + ' · ' + LOOP_SHAPE[i] + '</button>').join('') + '</div>' +
+    (loop.step > 0 ? '<button class="btn sm" id="loop-prev">Previous</button>' : '') +
+    '<button class="btn primary sm" id="loop-next">' + (last ? 'Finish interview' : 'Next question') + icon('arrow') + '</button>' +
+    '<button class="btn ghost sm" id="loop-quit">Exit</button>';
+  if (crumbs) crumbs.replaceWith(bar); else el.prepend(bar);
+  bar.querySelectorAll('[data-step]').forEach((b) => b.addEventListener('click', () => goStep(Number(b.dataset.step))));
+  if (loop.step > 0) $('#loop-prev').addEventListener('click', () => goStep(loop.step - 1));
+  $('#loop-next').addEventListener('click', () => goStep(loop.step + 1));
+  $('#loop-quit').addEventListener('click', exitLoop);
+}
+
+function showLoopSummary() {
+  current = null;
+  const iv = role === 'interviewer';
+  const scored = loop.scores.filter(Boolean);
+  // Overall = share of available rubric points, mapped back to the 1–4 scale.
+  const pts = scored.map((s) => s.total.split('/').map((n) => parseFloat(n)));
+  const ratio = pts.length ? pts.reduce((a, [g]) => a + g, 0) / pts.reduce((a, [, m]) => a + m, 0) : 0;
+  const avg = ratio * 4;
+  const overall = !pts.length ? '' : avg >= 3.4 ? 'Strong hire' : avg >= 2.8 ? 'Lean hire' : avg >= 2.2 ? 'Lean no hire' : 'Needs work';
+  const el = $('#case');
+  $('#picker').hidden = true;
+  el.hidden = false;
+  el.innerHTML =
+    '<nav class="crumbs"><button id="loop-exit">Full interview</button>' + icon('chev') + '<span>Summary</span></nav>' +
+    '<h1 class="detail-title">Interview complete</h1>' +
+    '<div class="props"><span class="prop">' + icon('check') + loop.items.length + ' questions</span>' +
+      (overall ? '<span class="prop"><span class="k">Overall</span>' + overall + ' · ' + Math.round(ratio * 100) + '% of rubric points</span>' : '') + '</div>' +
+    '<div class="layout"><div class="main">' +
+      '<div class="card"><div class="card-h">' + icon('star') + 'Scorecard by question</div><div class="sheet summary"><table><thead><tr><th>Question</th><th>Score</th><th>Verdict</th></tr></thead><tbody>' +
+        loop.items.map((it, i) => {
+          const x = loopItem(it), s = loop.scores[i];
+          return '<tr><td><b>' + (i + 1) + ' · ' + LOOP_SHAPE[i] + '</b><br><span class="muted">' + esc(itemTitle(x)) + '</span></td>' +
+            '<td class="num">' + (s ? esc(s.total) : '—') + '</td><td>' + (s ? esc(s.verdict) : (iv ? 'Not scored' : '—')) + '</td></tr>';
+        }).join('') + '</tbody></table></div></div>' +
+      '<div class="callout">' + icon('flag') + '<div>' + (iv
+        ? '<b>Debrief now.</b> Share one thing that went well and one to work on for each question, then swap sides and run a new interview.'
+        : '<b>Ask your interviewer for the scores.</b> Scores are recorded on the interviewer\'s screen; go back to any question to reread its debrief.') + '</div></div>' +
+    '</div><aside class="aside">' +
+      card('list', 'Revisit a question', '<ul class="plain">' + loop.items.map((it, i) =>
+        '<li><button class="linkbtn" data-step="' + i + '"><span class="mono">' + (i + 1) + '</span> ' + esc(itemTitle(loopItem(it))) + '</button></li>').join('') + '</ul>') +
+      '<div class="btn-row" style="flex-direction:column;align-items:stretch"><button class="btn primary" id="loop-new">Start a new interview</button></div>' +
+    '</aside></div>';
+  $('#loop-exit').addEventListener('click', exitLoop);
+  el.querySelectorAll('[data-step]').forEach((b) => b.addEventListener('click', () => { loop.step = Number(b.dataset.step); showLoopStage(); }));
+  $('#loop-new').addEventListener('click', () => { loopDraft = null; exitLoop(); });
+  syncHash();
+  window.scrollTo({ top: 0 });
+}
+
 /* ---------- detail view ---------- */
 function exhibitHtml(e) {
   return '<div class="exhibit"><div class="exhibit-t">' + esc(e.title) + '</div><div class="sheet"><table><thead><tr>' +
@@ -781,7 +961,7 @@ function exhibitHtml(e) {
     '</tbody></table></div>' + (e.note ? '<div class="sheet-note">' + esc(e.note) + '</div>' : '') + '</div>';
 }
 
-function closeItem() { current = null; stopTimer(true); $('#case').hidden = true; $('#case').innerHTML = ''; $('#picker').hidden = false; syncHash(); }
+function closeItem() { current = null; loop = null; stopTimer(true); $('#case').hidden = true; $('#case').innerHTML = ''; $('#picker').hidden = false; syncHash(); }
 function backToList() { role = null; closeItem(); renderList(); window.scrollTo({ top: $('#list-title').offsetTop - 80, behavior: 'smooth' }); }
 
 function openVideo(x) {
@@ -826,7 +1006,8 @@ const frameworkCard = (k, open) => '<details class="card"' + (open ? ' open' : '
 function openItem(kind, id, resetTimer = true) {
   const x = LIST_OF[kind].find((c) => c.id === id);
   if (!x) return;
-  if (TAB_OF[kind] !== tab) { tab = TAB_OF[kind]; applyTab(); }
+  if (loop) { if (tab !== 'loop') { tab = 'loop'; applyTab(); } }
+  else if (TAB_OF[kind] !== tab) { tab = TAB_OF[kind]; applyTab(); }
   if (kind === 'video') return openVideo(x);
   if (kind === 'guide') return openGuide(x);
   current = { kind, item: x };
@@ -862,6 +1043,7 @@ function openItem(kind, id, resetTimer = true) {
     $('#backlist').addEventListener('click', backToList);
     el.querySelectorAll('.role').forEach((b) => b.addEventListener('click', () => setRole(b.dataset.role)));
     syncHash();
+    if (loop) decorateLoop();
     window.scrollTo({ top: 0 });
     return;
   }
@@ -959,6 +1141,7 @@ function openItem(kind, id, resetTimer = true) {
   }
   renderClock();
   syncHash();
+  if (loop) decorateLoop();
   window.scrollTo({ top: 0 });
 }
 
@@ -1005,15 +1188,18 @@ function renderClock() {
 }
 
 /* ---------- links ---------- */
+// A full interview is linked as its question list plus the current step, so both partners stay in sync.
+const loopParam = () => 'loop=' + loop.items.map((it) => HASH_KEY[it.kind] + ':' + it.id).join(',') + '&step=' + loop.step;
 function syncHash() {
   const parts = [];
   if (role) parts.push('role=' + role);
-  if (current) parts.push(HASH_KEY[current.kind] + '=' + current.item.id);
+  if (loop) parts.push(loopParam());
+  else if (current) parts.push(HASH_KEY[current.kind] + '=' + current.item.id);
   history.replaceState(null, '', parts.length ? '#' + parts.join('&') : location.pathname);
 }
 function copyLink(forRole) {
-  const key = HASH_KEY[current.kind] + '=';
-  const url = location.origin + location.pathname + '#role=' + forRole + '&' + key + current.item.id;
+  const url = location.origin + location.pathname + '#role=' + forRole + '&' +
+    (loop ? loopParam() : HASH_KEY[current.kind] + '=' + current.item.id);
   const ok = () => { $('#copied').textContent = 'Link copied — send it to your partner.'; setTimeout(() => { const c = $('#copied'); if (c) c.textContent = ''; }, 2500); };
   if (navigator.clipboard) navigator.clipboard.writeText(url).then(ok, () => prompt('Copy this link:', url));
   else prompt('Copy this link:', url);
@@ -1045,6 +1231,14 @@ function boot() {
   const p = new URLSearchParams(location.hash.slice(1));
   const r = p.get('role');
   current = null;
+  loop = null;
+  const items = parseLoop(p.get('loop'));
+  if (items) {
+    role = r === 'interviewer' || r === 'candidate' ? r : null;
+    const step = Math.min(Math.max(Number(p.get('step')) || 0, 0), items.length);
+    loop = { items, step, scores: [] };
+    return showLoopStage();
+  }
   for (const kind of Object.keys(HASH_KEY)) {
     const id = p.get(HASH_KEY[kind]);
     const item = id && LIST_OF[kind].find((x) => x.id === id);
