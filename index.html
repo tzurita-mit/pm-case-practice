@@ -275,6 +275,11 @@
   .linkbtn:hover { color: var(--accent); }
   .linkbtn .mono { color: var(--text-3); margin-right: 4px; }
 
+  /* done toggle */
+  .done-btn { cursor: pointer; font-weight: 500; }
+  .done-btn:hover { border-color: var(--good); color: var(--good); }
+  .done-btn[aria-pressed="true"] { background: var(--good-soft); border-color: color-mix(in srgb, var(--good) 40%, transparent); color: var(--good); }
+
   /* study */
   .study-h { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 600; margin: 22px 0 10px; }
   .study-h svg.i { color: var(--accent); }
@@ -731,7 +736,7 @@ function openGuide(g) {
     '<h1 class="detail-title">' + esc(g.title) + '</h1>' +
     '<div class="props"><span class="prop" data-cat="' + g.cat + '"><span class="dot"></span>' + esc(k.name) + '</span>' +
       '<span class="prop">' + icon('list') + '<span class="k">Framework</span>' + esc(f.name) + '</span>' +
-      (f.origin ? '<span class="prop"><span class="k">Origin</span>' + esc(f.origin) + '</span>' : '') + '</div>' +
+      (f.origin ? '<span class="prop"><span class="k">Origin</span>' + esc(f.origin) + '</span>' : '') + doneButton('guide', g.id) + '</div>' +
     '<div class="layout"><div class="main">' +
       '<div class="card prompt-card"><div class="card-b"><p class="say">In a nutshell</p><div class="text" style="font-size:15.5px;font-weight:400">' + esc(g.summary) + '</div></div></div>' +
       '<div class="two">' + card('chat', 'What it sounds like', '<ul>' + li(g.looksLike) + '</ul>') + card('star', 'What interviewers look for', '<ul>' + li(g.evaluates) + '</ul>') + '</div>' +
@@ -759,7 +764,6 @@ function openGuide(g) {
   $('#backlist').addEventListener('click', backToList);
   el.querySelectorAll('[data-case]').forEach((b) => b.addEventListener('click', () => pickNew('case', b.dataset.case)));
   el.querySelectorAll('[data-goto]').forEach((b) => b.addEventListener('click', () => { const c = g.cat; role = null; setTab(b.dataset.goto); cat = c; renderCats(); renderList(); window.scrollTo({ top: $('#list-title').offsetTop - 80 }); }));
-  markDone(g.id);
   syncHash();
   window.scrollTo({ top: 0 });
 }
@@ -796,7 +800,7 @@ function openVideo(x) {
     '<h1 class="detail-title">' + esc(x.title) + '</h1>' +
     '<div class="props"><span class="prop" data-cat="' + x.cat + '"><span class="dot"></span>' + esc(k.name) + '</span>' +
       '<a class="prop" href="' + esc(x.chUrl || yt) + '" rel="noopener" target="_blank">' + icon('video') + '<span class="k">Channel</span>' + esc(x.ch) + '</a>' +
-      (x.co && x.co !== 'General' ? '<span class="prop"><span class="k">Company</span>' + esc(x.co) + '</span>' : '') + '</div>' +
+      (x.co && x.co !== 'General' ? '<span class="prop"><span class="k">Company</span>' + esc(x.co) + '</span>' : '') + doneButton('video', x.id) + '</div>' +
     '<div class="layout"><div class="main">' +
       '<div class="card player"><iframe src="https://www.youtube-nocookie.com/embed/' + encodeURIComponent(x.id) + '?rel=0" title="' + esc(x.title) + '" ' +
         'allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe></div>' +
@@ -811,7 +815,6 @@ function openVideo(x) {
     '</aside></div>';
   $('#backlist').addEventListener('click', backToList);
   el.querySelectorAll('[data-case]').forEach((b) => b.addEventListener('click', () => pickNew('case', b.dataset.case)));
-  markDone(x.id);
   syncHash();
   window.scrollTo({ top: 0 });
 }
@@ -847,6 +850,7 @@ function openItem(kind, id, resetTimer = true) {
       (kind === 'bank' && SOURCES[x.src] ? '<a class="prop" href="' + esc(SOURCES[x.src].url) + '" rel="noopener" target="_blank">' + icon('link') + '<span class="k">Source</span>' + esc(SOURCES[x.src].name) + '</a>' : '') +
       (kind === 'case' ? '<span class="prop">' + icon('doc') + '<span class="k">Source</span>Original case · illustrative data</span>' : '') +
       (kind === 'case' && x.exhibits && x.exhibits.length ? '<span class="prop">' + icon('table') + x.exhibits.length + ' exhibit' + (x.exhibits.length > 1 ? 's' : '') + '</span>' : '') +
+      doneButton(kind, x.id) +
     '</div>';
 
   const el = $('#case');
@@ -896,7 +900,7 @@ function openItem(kind, id, resetTimer = true) {
     main +=
       '<div class="callout">' + icon('flag') + '<div><b>Candidate mode.</b> Read the brief' + (kind === 'case' && x.exhibits && x.exhibits.length ? ' and the data' : '') + ', take a minute to structure, then think out loud. Expect follow-ups that push on your numbers.</div></div>' +
       card('pen', 'Scratchpad', '<textarea id="notes" placeholder="Structure, assumptions, numbers…"></textarea>') +
-      '<div><button class="btn primary" id="finish">' + icon('check') + 'I\'m done — show the debrief</button></div>' +
+      '<div><button class="btn primary" id="finish">' + icon('check') + 'Show the debrief</button></div>' +
       '<div id="debrief" hidden style="display:flex;flex-direction:column;gap:14px">' + guide +
         card('star', 'How you\'re scored', '<ul>' + k.rubric.map(([d, h]) => '<li><b>' + esc(d) + '</b> — ' + esc(h) + '</li>').join('') + '</ul>') +
       '</div>';
@@ -946,11 +950,10 @@ function openItem(kind, id, resetTimer = true) {
       $('#total').textContent = sum + ' / ' + max;
       $('#scorebar > i').style.width = (sum / max * 100) + '%';
       const v = $('#verdict'); v.textContent = label; v.className = 'verdict ' + tone;
-      markDone(x.id);
     })));
   } else {
     $('#finish').addEventListener('click', () => {
-      $('#debrief').hidden = false; $('#finish').hidden = true; stopTimer(false); markDone(x.id);
+      $('#debrief').hidden = false; $('#finish').hidden = true; stopTimer(false);
       $('#debrief').scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   }
@@ -959,7 +962,23 @@ function openItem(kind, id, resetTimer = true) {
   window.scrollTo({ top: 0 });
 }
 
-function markDone(id) { done.add(id); store.set('done', [...done]); renderProgress(); }
+// Progress is only ever changed by the user, via the toggle in each item's properties row.
+const DONE_TEXT = { case: ['Mark as done', 'Done'], bank: ['Mark as done', 'Done'], video: ['Mark as watched', 'Watched'], guide: ['Mark as read', 'Read'] };
+function doneButton(kind, id) {
+  const on = done.has(id);
+  const [off, yes] = DONE_TEXT[kind];
+  return '<button class="prop done-btn" data-done="' + esc(id) + '" data-kind="' + kind + '" aria-pressed="' + on + '" title="' + (on ? 'Click to undo' : '') + '">' +
+    icon('check') + (on ? yes : off) + '</button>';
+}
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-done]');
+  if (!b) return;
+  const id = b.dataset.done;
+  if (done.has(id)) done.delete(id); else done.add(id);
+  store.set('done', [...done]);
+  renderProgress();
+  b.outerHTML = doneButton(b.dataset.kind, id);
+});
 
 /* ---------- timer ---------- */
 function toggleTimer() {
